@@ -62,12 +62,8 @@ def insert_activity(id, startTime, activityType,duration, distance, calories, av
                 elevation_gain, json_payload
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """,
-            (
-                id, startTime, activityType,duration, distance, calories, averageHR, maxHR, steps, elevationGain, metadata
-            )
-
+            (id, startTime, activityType,duration, distance, calories, averageHR, maxHR, steps, elevationGain, metadata))
             return true
-        )
 
 def insert_exercise(aid, exercise_id, category, name, duration, reps, weight, start_time, end_time, rest_duration, per_kg_kcal):
     with get_connection() as conn:
