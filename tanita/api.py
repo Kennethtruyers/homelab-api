@@ -16,7 +16,7 @@ router = APIRouter()
 load_dotenv()
 
 @router.post("/scrape")
-async def scrape(playwright):
+async def scrape():
     async with async_playwright() as playwright:
         browser = await playwright.chromium.launch(headless=True)
         context = await browser.new_context(ignore_https_errors=True)
