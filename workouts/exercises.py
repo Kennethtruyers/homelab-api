@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request
-from data import (create_exercise, delete_exercise)
-from notion import (fetch_notion_page, parse_exercise)
+from workouts.data import (create_exercise, delete_exercise)
+from workouts.notion import (fetch_notion_page, parse_exercise)
 
 router = APIRouter()
 

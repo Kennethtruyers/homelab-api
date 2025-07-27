@@ -5,7 +5,7 @@ from garminconnect import Garmin
 from datetime import datetime, timedelta
 from dateutil.parser import parse as parse_date
 from fastapi import APIRouter, Request
-from data import insert_activity, insert_exercise
+from garmin.data import insert_activity, insert_exercise
 
 router = APIRouter()
 

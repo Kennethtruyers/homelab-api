@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request
-from data import (create_workout, delete_workout)
-from notion import (fetch_notion_page, parse_workout)
+from workouts.data import (create_workout, delete_workout)
+from workouts.notion import (fetch_notion_page, parse_workout)
 
 router = APIRouter()
 @router.post("/added")

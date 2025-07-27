@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-import notion
+import workouts.notion
 
 
 router = APIRouter()
