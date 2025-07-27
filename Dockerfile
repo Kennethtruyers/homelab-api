@@ -42,6 +42,8 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
 # Copy and install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
