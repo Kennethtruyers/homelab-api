@@ -29,16 +29,16 @@ app.add_middleware(
 ''' Workouts '''
 app.include_router(workouts_router, prefix="/workouts/workouts", tags=["workouts"])
 app.include_router(exercises_router, prefix="/workouts/exercises", tags=["exercises"])
-app.include_router(sync_router, prefix="/workouts/", tags=["sync"])
+app.include_router(sync_router, prefix="/workouts", tags=["sync"])
 
 ''' Nutrition '''
-app.include_router(nutrition_router, prefix="/nutrition/", tags=["nutrition"])
+app.include_router(nutrition_router, prefix="/nutrition", tags=["nutrition"])
 
 ''' Tanita '''
-app.include_router(tanita_router, prefix="/tanita/", tags=["tanita"])
+app.include_router(tanita_router, prefix="/tanita", tags=["tanita"])
 
 ''' Garmin '''
-app.include_router(garmin_router, prefix="/garmin/", tags=["garmin"])
+app.include_router(garmin_router, prefix="/garmin", tags=["garmin"])
 
 
 
