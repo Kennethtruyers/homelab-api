@@ -30,6 +30,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/kennethtruyers/python-scripts:latest
+          tags: ghcr.io/kennethtruyers/homelab-api:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
