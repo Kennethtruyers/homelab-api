@@ -25,7 +25,7 @@ async def exercise_changed(req: Request):
         create_exercise(workout_id, name, meta)
     return {"status": "ok"}
 
-@app.post("/deleted")
+@router.post("/deleted")
 async def exercise_deleted(req: Request):
     body = await req.json()
     workout_id = body.get("workout_id")
