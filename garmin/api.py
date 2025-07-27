@@ -11,15 +11,15 @@ router = APIRouter()
 
 
 @router.post("/fetch")
-def fetchData(START_DATE, END_DATE):
+def fetchData(startDate, endDate):
     TOKEN_DIR = os.getenv("TOKEN_STORE_PATH", "/app/token-store")
 
-    if not START_DATE or not END_DATE:
-        raise Exception("START_DATE and END_DATE must be set")
+    if not  or not endDate:
+        raise Exception("startDate and endDate must be set")
 
 
-    start = parse_date(START_DATE).date()
-    end = parse_date(END_DATE).date()
+    start = parse_date(startDate).date()
+    end = parse_date(endDate).date()
 
     print(f"Fetching activities from {start} to {end}")
 
