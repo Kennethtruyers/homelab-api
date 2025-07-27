@@ -86,7 +86,7 @@ def fetchData(START_DATE, END_DATE):
                             break
 
                     exercise_id = f"{aid}-{idx}"
-                    insert_exercise(aid, exercise_id, category, name, duration, reps, weight, start_time, end_time, rest_duration, per_kg_kcal))
+                    insert_exercise(aid, exercise_id, category, name, duration, reps, weight, start_time, end_time, rest_duration, per_kg_kcal)
             except Exception as e:
                 print(f"Warning: failed to fetch or insert strength sets for {aid}: {e}")
 
