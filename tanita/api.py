@@ -97,7 +97,7 @@ async def scrape():
 
 @router.post("/ingest-csv")
 async def download_and_ingest_csv():
-    path = download_csv()
+    path = await download_csv()
     ingest_csv(path)
 
 def safe_float(value):

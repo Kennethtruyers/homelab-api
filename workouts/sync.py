@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request
 import workouts.notion as notion
 
+print("NOTION:", notion)
 
 router = APIRouter()
 @router.post("/resync")
