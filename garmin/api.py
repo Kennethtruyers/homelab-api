@@ -35,7 +35,7 @@ def fetchData(startDate, endDate):
         activityType = a.get("activityType", {}).get("typeKey")
         print(f"Inserting activity {aid} of type {activityType}")
 
-        insert_activity(
+        inserted = insert_activity(
             aid, 
                 a.get("startTimeLocal"),
                 a.get("activityType", {}).get("typeKey"),
@@ -48,6 +48,9 @@ def fetchData(startDate, endDate):
                 a.get("elevationGain"),
                 json.dumps(a)
         )
+
+        if not inserted:
+            continue
 
         if activityType == "strength_training":
             try:

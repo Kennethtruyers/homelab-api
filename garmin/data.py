@@ -50,9 +50,9 @@ def init():
 def insert_activity(id, startTime, activityType,duration, distance, calories, averageHR, maxHR, steps, elevationGain, metadata):
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT 1 FROM garmin_activities WHERE activity_id = %s", (aid,))
+            cur.execute("SELECT 1 FROM garmin_activities WHERE activity_id = %s", (id,))
             if cur.fetchone():
-                return  # already exists
+                return false  # already exists
 
             cur.execute(
             """
@@ -65,6 +65,8 @@ def insert_activity(id, startTime, activityType,duration, distance, calories, av
             (
                 id, startTime, activityType,duration, distance, calories, averageHR, maxHR, steps, elevationGain, metadata
             )
+
+            return true
         )
 
 def insert_exercise(aid, exercise_id, category, name, duration, reps, weight, start_time, end_time, rest_duration, per_kg_kcal):
