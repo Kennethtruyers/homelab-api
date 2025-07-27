@@ -14,3 +14,4 @@ INFLUX_PORT = os.getenv("INFLUX_PORT")
 def get_influx_client(database):
     client = InfluxDBClient(host=INFLUX_HOST, port=INFLUX_PORT)
     client.switch_database(database)
+    return client
