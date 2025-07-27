@@ -4,6 +4,7 @@ from workouts.data import init as init_workouts
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from workouts.workouts import router as workouts_router
+from workouts.exercises import router as exercises_router
 from workouts.sync import router as sync_router
 from nutrition.api import router as nutrition_router
 from tanita.api import router as tanita_router
