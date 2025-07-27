@@ -14,7 +14,7 @@ router = APIRouter()
 def fetchData(startDate, endDate):
     TOKEN_DIR = os.getenv("TOKEN_STORE_PATH", "/app/token-store")
 
-    if not  or not endDate:
+    if not startDate or not endDate:
         raise Exception("startDate and endDate must be set")
 
 
