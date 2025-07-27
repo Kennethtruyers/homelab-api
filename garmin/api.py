@@ -47,7 +47,6 @@ def fetchData(START_DATE, END_DATE):
                 a.get("steps"),
                 a.get("elevationGain"),
                 json.dumps(a)
-            )
         )
 
         if activityType == "strength_training":
