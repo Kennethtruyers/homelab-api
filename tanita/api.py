@@ -97,7 +97,7 @@ async def scrape():
 
 @router.post("/ingest-csv")
 async def download_and_ingest_csv():
-    download_csv()
+    path = download_csv()
     ingest_csv()
 
 def safe_float(value):
@@ -136,10 +136,10 @@ async def download_csv():
 
         return download_path
 
-def ingest_csv():
+def ingest_csv(path):
     # --- Parse CSV ---
     entries = []
-    with open("data.csv", newline="", encoding="utf-8") as csvfile:
+    with open(path, newline="", encoding="utf-8") as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             try:
