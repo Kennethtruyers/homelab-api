@@ -95,7 +95,7 @@ async def scrape(playwright):
         client.write_points(data)
         print("Loaded data into Influx")
 
-@route.post("/ingest-csv")
+@router.post("/ingest-csv")
 async def download_and_ingest_csv():
     download_csv()
     ingest_csv()
