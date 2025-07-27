@@ -3,6 +3,7 @@ import os
 import json
 from garminconnect import Garmin
 from datetime import datetime, timedelta
+from typing import Optional
 from dateutil.parser import parse as parse_date
 from fastapi import APIRouter, Request
 from garmin.data import insert_activity, insert_exercise
@@ -11,12 +12,17 @@ router = APIRouter()
 
 
 @router.post("/fetch")
-def fetchData(startDate, endDate):
+def fetchData(
+    startDate: Optional[str] = None, 
+    endDate:  Optional[str] = None
+    ):
     TOKEN_DIR = os.getenv("TOKEN_STORE_PATH", "/app/token-store")
 
-    if not startDate or not endDate:
-        raise Exception("startDate and endDate must be set")
+    if not startDate:
+        startDate = (datetime.utcnow() - timedelta(days=3)).isoformat()
 
+    if not endDate:
+        endDate = (datetime.utcnow() + timedelta(days=1)).isoformat()
 
     start = parse_date(startDate).date()
     end = parse_date(endDate).date()
