@@ -1,9 +1,6 @@
-import asyncio
+import csv
 from playwright.async_api import async_playwright
 from fastapi import APIRouter, Request
-import json
-from datetime import datetime
-from influxdb import InfluxDBClient
 from datetime import datetime
 from dotenv import load_dotenv
 from connections import get_influx_client
