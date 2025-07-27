@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+influxdb
+python-dotenv
+playwright>=1.43
+garminconnect 
+psycopg2-binary 
+python-dateutil
+requests
