@@ -19,6 +19,6 @@ async def resync():
             workout_notion_id, exercise_name, variation, sets, reps, weight, rir, notes, metadata = parsed
             data.create_exercise(workout_notion_id, exercise_name, variation, sets, reps, weight, rir, notes, metadata)
 
-    return {"status": "resync complete"}
+    return {"status": "ok"}
 
 

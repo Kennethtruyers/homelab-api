@@ -22,10 +22,10 @@ def init():
                     variation TEXT,
                     sets INT,
                     reps INT, 
-                    weight INT,
+                    weight numeric(10,2),
                     rir INT,
                     notes TEXT,
-                    estimated_1rm NUMERIC GENERATED ALWAYS AS (weight * (1 + reps::NUMERIC / 30)) STORED,
+                    estimated_1rm numeric(10,2) GENERATED ALWAYS AS (weight * (1 + reps::NUMERIC / 30)) STORED,
                     metadata JSONB,
                     PRIMARY KEY (workout_notion_id, name)
                 );

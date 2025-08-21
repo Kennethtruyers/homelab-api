@@ -98,5 +98,9 @@ def fetchData(
                     insert_exercise(aid, exercise_id, category, name, duration, reps, weight, start_time, end_time, rest_duration, per_kg_kcal)
             except Exception as e:
                 print(f"Warning: failed to fetch or insert strength sets for {aid}: {e}")
-
+    
     print("Done inserting new activities and strength sets.")
+
+    return {"status": "ok"}
+
+    

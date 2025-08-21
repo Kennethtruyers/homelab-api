@@ -91,11 +91,13 @@ async def scrape():
         client = get_influx_client("fitness")
         client.write_points(data)
         print("Loaded data into Influx")
+        return {"status": "ok"}
 
 @router.post("/ingest-csv")
 async def download_and_ingest_csv():
     path = await download_csv()
     ingest_csv(path)
+    return {"status": "ok"}
 
 def safe_float(value):
     value = value.strip().replace(",", ".")
