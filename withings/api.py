@@ -13,7 +13,7 @@ WBSAPI_URL = "https://wbsapi.withings.net"
 
 @router.get("/")
 async def get_token(code: str = Query(...), state: str = Query(...)):
-     """
+    """
     Callback route when the user has accepted to share his data.
     Withings servers send back an authorization code and the original state.
     """
