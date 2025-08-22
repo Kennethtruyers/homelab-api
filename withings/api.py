@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, Query
+import requests
 import workouts.notion as notion
 import workouts.data as data
 import os
