@@ -9,7 +9,6 @@ router = APIRouter()
 CLIENT_ID = os.getenv("WITHINGS_CLIENT_ID")
 CLIENT_SECRET = os.getenv("WITHINGS_CLIENT_SECRET")
 CALLBACK_URI = "https://homelab-api.kenneth-truyers.net/withings"
-ACCOUNT_URL = "https://account.withings.com"
 WBSAPI_URL = "https://wbsapi.withings.net"
 
 @router.get("/")
@@ -20,6 +19,7 @@ async def get_token(code: str = Query(...), state: str = Query(...)):
     """
 
     payload = {
+        "action": "requesttoken",
         "grant_type": "authorization_code",
         "client_id": CLIENT_ID,
         "client_secret": CLIENT_SECRET,
@@ -27,7 +27,8 @@ async def get_token(code: str = Query(...), state: str = Query(...)):
         "redirect_uri": CALLBACK_URI,
     }
 
-    r = requests.post(f"{ACCOUNT_URL}/oauth2/token", data=payload)
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    r = requests.post(f"{WBSAPI_URL}/v2/oauth2", json=payload, headers=headers)
     print(r.status_code)
     print(r.text)   
     r_token = r.json()
