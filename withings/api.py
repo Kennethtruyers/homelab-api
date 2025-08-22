@@ -1,8 +1,44 @@
 from fastapi import APIRouter, Request
 import workouts.notion as notion
 import workouts.data as data
+import os
 
 router = APIRouter()
-@router.post("/")
-def test():
-    return {"status": "ok"}
+
+CLIENT_ID = os.getenv("WITHINGS_CLIENT_ID")
+CLIENT_SECRET = os.getenv("WITHINGS_CLIENT_SECRET")
+CALLBACK_URI = "https://homelab-api.kenneth-truyers.net/withings"
+ACCOUNT_URL = "https://account.withings.com"
+WBSAPI_URL = "https://wbsapi.withings.net"
+
+@router.get("/")
+async def get_token(code: str = Query(...), state: str = Query(...)):
+     """
+    Callback route when the user has accepted to share his data.
+    Withings servers send back an authorization code and the original state.
+    """
+
+    payload = {
+        "grant_type": "authorization_code",
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET,
+        "code": code,
+        "redirect_uri": CALLBACK_URI,
+    }
+
+    r_token = requests.post(f"{ACCOUNT_URL}/oauth2/token", data=payload).json()
+    access_token = r_token.get("access_token", "")
+
+    headers = {"Authorization": f"Bearer {access_token}"}
+    payload = {"action": "getdevice"}
+
+    return access_token
+
+    # # List devices of returned user
+    # r_getdevice = requests.get(
+    #     f"{WBSAPI_URL}/v2/user",
+    #     headers=headers,
+    #     params=payload
+    # ).json()
+
+    # return r_getdevice
