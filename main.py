@@ -9,6 +9,7 @@ from workouts.sync import router as sync_router
 from nutrition.api import router as nutrition_router
 from tanita.api import router as tanita_router
 from garmin.api import router as garmin_router
+from withings.api import router as withings_router
 
 
 print("Initializing tables")
@@ -39,6 +40,9 @@ app.include_router(tanita_router, prefix="/tanita", tags=["tanita"])
 
 ''' Garmin '''
 app.include_router(garmin_router, prefix="/garmin", tags=["garmin"])
+
+''' Withings '''
+app.include_router(withings_router, prefix="/withings", tags=["withings"])
 
 
 
