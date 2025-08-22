@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request
 import workouts.notion as notion
 import workouts.data as data
 import os
-
+from withings.data import upsert_tokens, get_tokens
 router = APIRouter()
 
 CLIENT_ID = os.getenv("WITHINGS_CLIENT_ID")
@@ -28,11 +28,12 @@ async def get_token(code: str = Query(...), state: str = Query(...)):
 
     r_token = requests.post(f"{ACCOUNT_URL}/oauth2/token", data=payload).json()
     access_token = r_token.get("access_token", "")
+    refresh_token = r_token.get("refresh_token", "")
+    expires_in = r_token.get("expires_in", "")
 
-    headers = {"Authorization": f"Bearer {access_token}"}
-    payload = {"action": "getdevice"}
+    upsert_tokens(access_token, refresh_token, expires_in)
 
-    return access_token
+    return r_token
 
     # # List devices of returned user
     # r_getdevice = requests.get(

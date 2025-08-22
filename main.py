@@ -1,6 +1,7 @@
 
 from garmin.data import init as init_garmin
 from workouts.data import init as init_workouts
+from withings.data import init as init_withings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from workouts.workouts import router as workouts_router
@@ -15,6 +16,7 @@ from withings.api import router as withings_router
 print("Initializing tables")
 init_garmin()
 init_workouts()
+init_withings()
 
 print("Starting API")
 app = FastAPI()
