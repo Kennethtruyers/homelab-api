@@ -27,7 +27,10 @@ async def get_token(code: str = Query(...), state: str = Query(...)):
         "redirect_uri": CALLBACK_URI,
     }
 
-    r_token = requests.post(f"{ACCOUNT_URL}/oauth2/token", data=payload).json()
+    r = requests.post(f"{ACCOUNT_URL}/oauth2/token", data=payload)
+    print(r.status_code)
+    print(r.text)   
+    r_token = r.json()
     access_token = r_token.get("access_token", "")
     refresh_token = r_token.get("refresh_token", "")
     expires_in = r_token.get("expires_in", "")
