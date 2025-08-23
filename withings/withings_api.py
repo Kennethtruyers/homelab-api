@@ -67,13 +67,8 @@ def get_measures(user_id, meastypes : list[int], startdate : int, enddate: int):
         if offset is not None:
             params["offset"] = offset
 
-        resp = send_authenticated_request("/measure", params, user_id)
+        body = send_authenticated_request("/measure", params, user_id).get("body")
 
-        data = resp.json()
-        if data.get("status") != 0 or "body" not in data:
-            raise RuntimeError(f"Withings getmeas error: {data}")
-
-        body = data["body"]
         groups = body.get("measuregrps", [])
         all_groups.extend(groups)
 
