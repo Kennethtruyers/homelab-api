@@ -69,7 +69,6 @@ def get_measures(user_id, meastypes : list[int], startdate : int, enddate: int):
 
         resp = send_authenticated_request("/measure", params, user_id)
 
-        resp.raise_for_status()
         data = resp.json()
         if data.get("status") != 0 or "body" not in data:
             raise RuntimeError(f"Withings getmeas error: {data}")
@@ -159,7 +158,6 @@ def send_request(url: str, payload: Dict[str, Any], token: str = None) -> Dict[s
         headers["Authorization"] = f"Bearer {token}"
 
     resp = requests.post(f"{WBSAPI_URL}/{url}", json=payload, headers=headers, timeout=10)
-    resp.raise_for_status()
     data = resp.json()
     if data.get("status") != 0 or "body" not in data:
         raise RuntimeError(f"Withings API error: {data}")
