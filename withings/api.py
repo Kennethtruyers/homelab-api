@@ -64,7 +64,7 @@ async def notify(request: Request):
         196, # Electrodermal Activity (feet)
         226, # Basal Metabolic Rate (BMR)
         229, # Electrochemical Skin Conductance
-    ], data.startdate, data.enddate)
+    ], data["startdate"], data["enddate"])
 
     print(response)
 
