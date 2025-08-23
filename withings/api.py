@@ -39,7 +39,7 @@ async def notify(request: Request):
 
     print(data)
 
-    response = withings_api.get_measure([
+    response = withings_api.get_measure(data["userid"], [
         1,   # Weight (kg)
         5,   # Fat Free Mass (kg)
         6,   # Fat Ratio (%)

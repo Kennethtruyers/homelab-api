@@ -16,16 +16,16 @@ def subscribe(user_id : str, appli : int, url: str):
         "action": "subscribe",
         "callbackurl": f"https://homelab-api.kenneth-truyers.net/withings/{url}",
         "appli": appli
-    })
+    }, user_id)
 
-def get_measure(meastypes : list[int], startdate : int, enddate: int):
+def get_measure(user_id, meastypes : list[int], startdate : int, enddate: int):
     return send_authenticated_request("/measure", {
         "action": "getmeas",
         "meastypes": meastypes,
         "startdate": startdate,
         "enddate": enddate,
         "category": 1
-    })
+    }, user_id)
 
 def get_token_from_code(code: str) -> Dict[str, Any]:
     payload = {
