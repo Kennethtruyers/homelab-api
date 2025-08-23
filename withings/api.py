@@ -5,6 +5,8 @@ import workouts.data as data
 import os
 from withings.data import upsert_tokens, get_tokens
 import withings.withings_api  as withings_api
+from urllib.parse import parse_qs
+
 router = APIRouter()
 
 @router.get("/")
@@ -31,8 +33,10 @@ async def notify(request: Request):
         # Withings (and other webhook providers) sometimes ping with HEAD
         return Response(status_code=200)
 
-    form = await request.form()
-    data = dict(form)  # converts MultiDict into a plain dict
-    print(data)        # {'userid': '44454286', 'startdate': '1755933497', ...}
+     raw = await request.body()
+    parsed = parse_qs(raw.decode())
+    data = {k: v[0] if len(v) == 1 else v for k, v in parsed.items()}
     
+    print(data)        # {'userid': '44454286', 'startdate': '1755933497', ...}
+
     return {"status": "ok"}
