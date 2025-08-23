@@ -14,7 +14,7 @@ REFRESH_GRACE_SECONDS = 30  # refresh if expiring within next 30s
 def subscribe(user_id : str, appli : int, url: str):
     querystring = f"action=subscribe&callbackUrl=https://homelab-api.kenneth-truyers.net/withings/{url}&appli={appli}"
     token = get_access_token(user_id)
-    send_request(f"{CALLBACK_URI}/notify?{querystring}")
+    send_request(f"{CALLBACK_URI}/notify?{querystring}", None, token)
 
 def get_token_from_code(code: str) -> Dict[str, Any]:
     payload = {
