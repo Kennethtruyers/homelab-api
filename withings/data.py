@@ -1,6 +1,7 @@
 from connections import get_connection
 from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any, Iterable, Tuple
+import psycopg2.extras as extras
 
 def init():
     with get_connection() as conn:
