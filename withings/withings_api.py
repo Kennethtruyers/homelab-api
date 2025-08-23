@@ -12,9 +12,20 @@ WBSAPI_URL = "https://wbsapi.withings.net"
 REFRESH_GRACE_SECONDS = 30  # refresh if expiring within next 30s
 
 def subscribe(user_id : str, appli : int, url: str):
-    querystring = f"action=subscribe&callbackurl=https://homelab-api.kenneth-truyers.net/withings/{url}&appli={appli}"
-    token = get_access_token(user_id)
-    send_request(f"{CALLBACK_URI}/notify?{querystring}", None, token)
+    send_authenticated_request("/notify", {
+        "action": "subscribe",
+        "callbackurl": f"https://homelab-api.kenneth-truyers.net/withings/{url}",
+        "appli": appli
+    })
+
+def get_measure(meastypes : int[], startdate : int, enddate: int):
+    return send_authenticated_request("/measure", {
+        "action": "getmeas",
+        "meastypes": meastypes,
+        "startdate": startdate,
+        "enddate": enddate,
+        "category": 1
+    })
 
 def get_token_from_code(code: str) -> Dict[str, Any]:
     payload = {
@@ -38,6 +49,10 @@ def get_token_from_refresh_token(refresh_token: str) -> Dict[str, Any]:
     }
     return send_request("v2/oauth2", payload)
 
+def send_authenticated_request(url : str, query : Dict[str, Any], user_id: str):
+    token = get_access_token(user_id)
+    querystring = get_query_string(query)
+    return send_request(f"{url}?{querystring}", None, token)
 
 def send_request(url: str, payload: Dict[str, Any], token: str = None) -> Dict[str, Any]:
     headers = {"Accept": "application/json", "Content-Type": "application/json"}
@@ -94,3 +109,8 @@ def get_access_token(user_id: str) -> str:
     upsert_tokens(new_access, new_refresh, expires_in, user_id)
 
     return new_access
+
+def get_query_string(payload : Dict(str, any)):
+    if not payload:
+        return ""
+    return urlencode(payload)

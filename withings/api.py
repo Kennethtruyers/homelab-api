@@ -39,4 +39,8 @@ async def notify(request: Request):
 
     print(data)        # {'userid': '44454286', 'startdate': '1755933497', ...}
 
+    response = withings_api.get_measure([1,168,169,170,173,174,175,226,91,11,155,158,159,167,196,229])
+
+    print(response)
+
     return {"status": "ok"}
