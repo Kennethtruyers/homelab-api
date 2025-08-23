@@ -59,7 +59,7 @@ def get_measures(user_id, meastypes : list[int], startdate : int, enddate: int):
         params["enddate"] = enddate
 
 
-    all_groups: List[Dict[str, Any]] = []
+    all_groups = []
     more = 1
     offset = None
 
@@ -90,24 +90,9 @@ def get_measures(user_id, meastypes : list[int], startdate : int, enddate: int):
 def parse_measure_groups(
     merged_body: Dict[str, Any],
     type_map: Dict[int, str] = TYPE_MAP
-) -> List[Dict[str, Any]]:
-    """
-    Transforms measuregrps into a list of dicts:
-    {
-      "timestamp": 1755938448,
-      "datetime": "2025-09-22T12:34:56Z",  # optional convenience field
-      "timezone": "Europe/Madrid",
-      "data": {
-          "weight_kg": 70.9,
-          "fat_mass_kg": 6.0,
-          "fat_ratio_pct": 8.463,
-          "fat_free_mass_kg": 64.9,
-          ...
-      }
-    }
-    """
+) -> list[Dict[str, Any]]:
     tz = merged_body.get("timezone")
-    rows: List[Dict[str, Any]] = []
+    rows: list[Dict[str, Any]] = []
 
     for grp in merged_body.get("measuregrps", []):
         ts = grp.get("date")
