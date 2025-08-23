@@ -71,12 +71,12 @@ async def notify(request: Request):
     return {"status": "ok"}
 
 @router.api_route("/fetch", methods=["POST", "HEAD"])
-async def fetch(request: Request):
+async def fetch(userid: str = Query(...)):
     if request.method == "HEAD":
         # Withings (and other webhook providers) sometimes ping with HEAD
         return Response(status_code=200)
 
-    response = withings_api.get_measure(data["userid"], [
+    response = withings_api.get_measure(userid, [
         1,   # Weight (kg)
         5,   # Fat Free Mass (kg)
         6,   # Fat Ratio (%)
