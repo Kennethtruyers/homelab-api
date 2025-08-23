@@ -11,6 +11,32 @@ CLIENT_SECRET = os.getenv("WITHINGS_CLIENT_SECRET")
 CALLBACK_URI = "https://homelab-api.kenneth-truyers.net/withings"
 WBSAPI_URL = "https://wbsapi.withings.net"
 REFRESH_GRACE_SECONDS = 30  # refresh if expiring within next 30s
+TYPE_MAP: Dict[int, str] = {
+    1:   "weight_kg",
+    5:   "fat_free_mass_kg",
+    6:   "fat_ratio_pct",
+    8:   "fat_mass_kg",
+    11:  "heart_pulse_bpm",               # Standing HR from scale
+    76:  "muscle_mass_kg",
+    77:  "total_body_water_kg",
+    88:  "bone_mass_kg",
+    91:  "pulse_wave_velocity_mps",
+    130: "ecg_atrial_fibrillation",
+    135: "ecg_qrs_interval_ms",
+    136: "ecg_pr_interval_ms",
+    137: "ecg_qt_interval_ms",
+    138: "ecg_qtc_interval_ms",
+    155: "vascular_age",
+    167: "nerve_health_score_conductance",  # feet electrodes
+    168: "extracellular_water_kg",
+    169: "intracellular_water_kg",
+    170: "visceral_fat_index",
+    174: "segmental_fat_mass",              # per-limb/trunk values
+    175: "segmental_muscle_mass",           # per-limb/trunk values
+    196: "electrodermal_activity_feet",
+    226: "basal_metabolic_rate_kcal",
+    229: "electrochemical_skin_conductance",
+}
 
 def subscribe(user_id : str, appli : int, url: str):
     send_authenticated_request("/notify", {
@@ -208,29 +234,3 @@ def _normalize_value(value: int, unit_exp: int) -> float:
     return float(value) * (10.0 ** unit_exp)
 
 
-TYPE_MAP: Dict[int, str] = {
-    1:   "weight_kg",
-    5:   "fat_free_mass_kg",
-    6:   "fat_ratio_pct",
-    8:   "fat_mass_kg",
-    11:  "heart_pulse_bpm",               # Standing HR from scale
-    76:  "muscle_mass_kg",
-    77:  "total_body_water_kg",
-    88:  "bone_mass_kg",
-    91:  "pulse_wave_velocity_mps",
-    130: "ecg_atrial_fibrillation",
-    135: "ecg_qrs_interval_ms",
-    136: "ecg_pr_interval_ms",
-    137: "ecg_qt_interval_ms",
-    138: "ecg_qtc_interval_ms",
-    155: "vascular_age",
-    167: "nerve_health_score_conductance",  # feet electrodes
-    168: "extracellular_water_kg",
-    169: "intracellular_water_kg",
-    170: "visceral_fat_index",
-    174: "segmental_fat_mass",              # per-limb/trunk values
-    175: "segmental_muscle_mass",           # per-limb/trunk values
-    196: "electrodermal_activity_feet",
-    226: "basal_metabolic_rate_kcal",
-    229: "electrochemical_skin_conductance",
-}
