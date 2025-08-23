@@ -32,6 +32,7 @@ async def get_token(code: str = Query(...), state: str = Query(...)):
     print(r.status_code)
     print(r.text)   
     r_token = r.json()
+    print(r_token)
     userid = r_token.get("userid")
     access_token = r_token.get("access_token")
     refresh_token = r_token.get("refresh_token")
