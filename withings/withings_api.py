@@ -18,7 +18,7 @@ def subscribe(user_id : str, appli : int, url: str):
         "appli": appli
     })
 
-def get_measure(meastypes : int[], startdate : int, enddate: int):
+def get_measure(meastypes : list[int], startdate : int, enddate: int):
     return send_authenticated_request("/measure", {
         "action": "getmeas",
         "meastypes": meastypes,
