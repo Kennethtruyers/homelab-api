@@ -59,7 +59,7 @@ def get_measures(user_id, meastypes : list[int], startdate : int, enddate: int):
         if not more or not offset:
             break
 
-    return send_authenticated_request("/measure", , user_id)
+    return parse_measure_groups(all_groups)
 
 def parse_measure_groups(
     merged_body: Dict[str, Any],
