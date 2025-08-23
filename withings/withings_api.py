@@ -82,7 +82,7 @@ def get_measures(user_id, meastypes : list[int], startdate : int, enddate: int):
     return parse_measure_groups(all_groups)
 
 def parse_measure_groups(
-    merged_body: list[],
+    merged_body: list[Any],
     type_map: Dict[int, str] = TYPE_MAP
 ) -> list[Dict[str, Any]]:
     rows: list[Dict[str, Any]] = []
