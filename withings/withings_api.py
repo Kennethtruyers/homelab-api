@@ -87,8 +87,8 @@ def get_access_token(user_id: str) -> str:
         raise HTTPException(status_code=502, detail=f"Withings refresh failed: {e}")
 
     new_access = body["access_token"]
-    new_refresh = body.get("refresh_token", refresh_token)
-    expires_in = int(body.get("expires_in", 3600))
+    new_refresh = body["refresh_token"]
+    expires_in = body["expires_in"]
 
     # Persist new tokens
     upsert_tokens(new_access, new_refresh, expires_in, user_id)
