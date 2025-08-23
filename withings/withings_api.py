@@ -139,7 +139,7 @@ def get_token_from_code(code: str) -> Dict[str, Any]:
 
 def get_token_from_refresh_token(refresh_token: str) -> Dict[str, Any]:
     payload = {
-        "action": "refreshtoken",
+        "action": "requesttoken",
         "grant_type": "refresh_token",
         "client_id": CLIENT_ID,
         "client_secret": CLIENT_SECRET,
