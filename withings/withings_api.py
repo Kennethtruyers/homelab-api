@@ -52,6 +52,7 @@ def get_token_from_refresh_token(refresh_token: str) -> Dict[str, Any]:
 def send_authenticated_request(url : str, query : Dict[str, Any], user_id: str):
     token = get_access_token(user_id)
     querystring = get_query_string(query)
+    print(querystring)
     return send_request(f"{url}?{querystring}", None, token)
 
 def send_request(url: str, payload: Dict[str, Any], token: str = None) -> Dict[str, Any]:
