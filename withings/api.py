@@ -25,7 +25,14 @@ async def set_notifications(userid: str = Query(...)):
     withings_api.subscribe(userid, 1, "notify")
     withings_api.subscribe(userid, 54, "notify")
 
-@router.post("/notify")
+@router.api_route("/notify", methods=["POST", "HEAD"])
 async def notify(request: Request):
-    raw = await request.body()
-    print(raw.decode())
+    if request.method == "HEAD":
+        # Withings (and other webhook providers) sometimes ping with HEAD
+        return Response(status_code=200)
+
+    form = await request.form()
+    data = dict(form)  # converts MultiDict into a plain dict
+    print(data)        # {'userid': '44454286', 'startdate': '1755933497', ...}
+    
+    return {"status": "ok"}
