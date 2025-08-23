@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any
 from fastapi import HTTPException
 from withings.data import get_tokens, upsert_tokens
+from urllib.parse import urlencode
 
 CLIENT_ID = os.getenv("WITHINGS_CLIENT_ID")
 CLIENT_SECRET = os.getenv("WITHINGS_CLIENT_SECRET")
