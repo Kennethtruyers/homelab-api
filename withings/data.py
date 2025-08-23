@@ -1,4 +1,5 @@
 from connections import get_connection
+import datetime
 
 def init():
     with get_connection() as conn:
