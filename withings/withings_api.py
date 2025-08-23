@@ -22,7 +22,7 @@ def subscribe(user_id : str, appli : int, url: str):
 def get_measure(user_id, meastypes : list[int], startdate : int, enddate: int):
     return send_authenticated_request("/measure", {
         "action": "getmeas",
-        "meastypes": meastypes,
+        "meastypes": ",".join(str(m) for m in meastypes),
         "startdate": startdate,
         "enddate": enddate,
         "category": 1
