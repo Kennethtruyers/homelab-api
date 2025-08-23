@@ -110,7 +110,7 @@ def get_access_token(user_id: str) -> str:
 
     return new_access
 
-def get_query_string(payload : Dict(str, any)):
+def get_query_string(payload : Dict[str, any]):
     if not payload:
         return ""
     return urlencode(payload)
