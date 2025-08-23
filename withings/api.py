@@ -69,3 +69,40 @@ async def notify(request: Request):
     print(response)
 
     return {"status": "ok"}
+
+@router.api_route("/fetch", methods=["POST", "HEAD"])
+async def fetch(request: Request):
+    if request.method == "HEAD":
+        # Withings (and other webhook providers) sometimes ping with HEAD
+        return Response(status_code=200)
+
+    response = withings_api.get_measure(data["userid"], [
+        1,   # Weight (kg)
+        5,   # Fat Free Mass (kg)
+        6,   # Fat Ratio (%)
+        8,   # Fat Mass Weight (kg)
+        11,  # Heart Pulse (bpm, standing HR from scale)
+        76,  # Muscle Mass (kg)
+        77,  # Hydration / Total Body Water (kg)
+        88,  # Bone Mass (kg)
+        91,  # Pulse Wave Velocity (m/s)
+        130, # Atrial fibrillation result (ECG)
+        135, # QRS interval duration (ECG)
+        136, # PR interval duration (ECG)
+        137, # QT interval duration (ECG)
+        138, # Corrected QT interval duration (ECG)
+        155, # Vascular age (derived from PWV)
+        167, # Nerve Health Score / Conductance (feet electrodes)
+        168, # Extracellular Water (kg)
+        169, # Intracellular Water (kg)
+        170, # Visceral Fat (index, unitless)
+        174, # Segmental Fat Mass (arms, legs, trunk)
+        175, # Segmental Muscle Mass (arms, legs, trunk)
+        196, # Electrodermal Activity (feet)
+        226, # Basal Metabolic Rate (BMR)
+        229, # Electrochemical Skin Conductance
+    ], None, None)
+
+    print(response)
+
+    return {"status": "ok"}

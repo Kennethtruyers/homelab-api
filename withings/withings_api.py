@@ -19,14 +19,100 @@ def subscribe(user_id : str, appli : int, url: str):
         "appli": appli
     }, user_id)
 
-def get_measure(user_id, meastypes : list[int], startdate : int, enddate: int):
-    return send_authenticated_request("/measure", {
+def get_measures(user_id, meastypes : list[int], startdate : int, enddate: int):
+    params = {
         "action": "getmeas",
         "meastypes": ",".join(str(m) for m in meastypes),
-        "startdate": startdate,
-        "enddate": enddate,
         "category": 1
-    }, user_id)
+    }
+
+    if startdate: 
+        params["startdate"] = startdate
+
+    if enddate: 
+        params["enddate"] = enddate
+
+
+    all_groups: List[Dict[str, Any]] = []
+    more = 1
+    offset = None
+
+    while more:
+        if offset is not None:
+            params["offset"] = offset
+
+        resp = send_authenticated_request("/measure", params, user_id)
+
+        resp.raise_for_status()
+        data = resp.json()
+        if data.get("status") != 0 or "body" not in data:
+            raise RuntimeError(f"Withings getmeas error: {data}")
+
+        body = data["body"]
+        groups = body.get("measuregrps", [])
+        all_groups.extend(groups)
+
+        more = int(body.get("more", 0))
+        offset = body.get("offset")
+
+        # Optional: stop if server doesn't return new groups (safety)
+        if not more or not offset:
+            break
+
+    return send_authenticated_request("/measure", , user_id)
+
+def parse_measure_groups(
+    merged_body: Dict[str, Any],
+    type_map: Dict[int, str] = TYPE_MAP
+) -> List[Dict[str, Any]]:
+    """
+    Transforms measuregrps into a list of dicts:
+    {
+      "timestamp": 1755938448,
+      "datetime": "2025-09-22T12:34:56Z",  # optional convenience field
+      "timezone": "Europe/Madrid",
+      "data": {
+          "weight_kg": 70.9,
+          "fat_mass_kg": 6.0,
+          "fat_ratio_pct": 8.463,
+          "fat_free_mass_kg": 64.9,
+          ...
+      }
+    }
+    """
+    tz = merged_body.get("timezone")
+    rows: List[Dict[str, Any]] = []
+
+    for grp in merged_body.get("measuregrps", []):
+        ts = grp.get("date")
+        dt_str = (
+            datetime.utcfromtimestamp(ts).isoformat() + "Z"
+            if isinstance(ts, int)
+            else None
+        )
+
+        for m in grp.get("measures", []):
+            m_type = m.get("type")
+            m_val = m.get("value")
+            m_unit = m.get("unit", 0)
+            if m_type is None or m_val is None:
+                continue
+
+            normalized = float(m_val) * (10.0 ** m_unit)
+            field_name = type_map.get(m_type, f"type_{m_type}")
+
+            row = {
+                "datetime": dt_str,
+                "timestamp": ts,
+                "timezone": tz,
+                "key": field_name,
+                "value": normalized,
+                "fm": m.get("fm", None),
+                "algo": m.get("algo", None)
+            }
+            rows.append(row)
+
+    return rows
 
 def get_token_from_code(code: str) -> Dict[str, Any]:
     payload = {
@@ -116,3 +202,35 @@ def get_query_string(payload : Dict[str, any]):
     if not payload:
         return ""
     return urlencode(payload)
+
+def _normalize_value(value: int, unit_exp: int) -> float:
+    """Withings measure normalization: value * 10**unit."""
+    return float(value) * (10.0 ** unit_exp)
+
+
+TYPE_MAP: Dict[int, str] = {
+    1:   "weight_kg",
+    5:   "fat_free_mass_kg",
+    6:   "fat_ratio_pct",
+    8:   "fat_mass_kg",
+    11:  "heart_pulse_bpm",               # Standing HR from scale
+    76:  "muscle_mass_kg",
+    77:  "total_body_water_kg",
+    88:  "bone_mass_kg",
+    91:  "pulse_wave_velocity_mps",
+    130: "ecg_atrial_fibrillation",
+    135: "ecg_qrs_interval_ms",
+    136: "ecg_pr_interval_ms",
+    137: "ecg_qt_interval_ms",
+    138: "ecg_qtc_interval_ms",
+    155: "vascular_age",
+    167: "nerve_health_score_conductance",  # feet electrodes
+    168: "extracellular_water_kg",
+    169: "intracellular_water_kg",
+    170: "visceral_fat_index",
+    174: "segmental_fat_mass",              # per-limb/trunk values
+    175: "segmental_muscle_mass",           # per-limb/trunk values
+    196: "electrodermal_activity_feet",
+    226: "basal_metabolic_rate_kcal",
+    229: "electrochemical_skin_conductance",
+}
