@@ -82,13 +82,12 @@ def get_measures(user_id, meastypes : list[int], startdate : int, enddate: int):
     return parse_measure_groups(all_groups)
 
 def parse_measure_groups(
-    merged_body: Dict[str, Any],
+    merged_body: list[],
     type_map: Dict[int, str] = TYPE_MAP
 ) -> list[Dict[str, Any]]:
-    tz = merged_body.get("timezone")
     rows: list[Dict[str, Any]] = []
 
-    for grp in merged_body.get("measuregrps", []):
+    for grp in merged_body:
         ts = grp.get("date")
         dt_str = (
             datetime.utcfromtimestamp(ts).isoformat() + "Z"
@@ -109,7 +108,6 @@ def parse_measure_groups(
             row = {
                 "datetime": dt_str,
                 "timestamp": ts,
-                "timezone": tz,
                 "key": field_name,
                 "value": normalized,
                 "fm": m.get("fm", None),
