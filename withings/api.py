@@ -33,10 +33,10 @@ async def notify(request: Request):
         # Withings (and other webhook providers) sometimes ping with HEAD
         return Response(status_code=200)
 
-     raw = await request.body()
+    raw = await request.body()
     parsed = parse_qs(raw.decode())
     data = {k: v[0] if len(v) == 1 else v for k, v in parsed.items()}
-    
+
     print(data)        # {'userid': '44454286', 'startdate': '1755933497', ...}
 
     return {"status": "ok"}
