@@ -33,10 +33,10 @@ async def get_token(code: str = Query(...), state: str = Query(...)):
     print(r.text)   
     r_token = r.json()
     print(r_token)
-    userid = r_token.get("userid")
-    access_token = r_token.get("access_token")
-    refresh_token = r_token.get("refresh_token")
-    expires_in = int(r_token.get("expires_in"))
+    userid = r_token["body"]["userid"]
+    access_token = r_token["body"]["access_token"]
+    refresh_token = r_token["body"]["refresh_token"]
+    expires_in = r_token["body"]["expires_in"]
 
     upsert_tokens(access_token, refresh_token, expires_in, userid)
 
