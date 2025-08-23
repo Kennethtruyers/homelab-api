@@ -39,7 +39,7 @@ async def notify(request: Request):
 
     print(data)
 
-    response = withings_api.get_measure(data["userid"], [
+    response = withings_api.get_measures(data["userid"], [
         1,   # Weight (kg)
         5,   # Fat Free Mass (kg)
         6,   # Fat Ratio (%)
@@ -72,7 +72,7 @@ async def notify(request: Request):
 
 @router.post("/fetch")
 async def fetch(userid: str = Query(...)):
-    response = withings_api.get_measure(userid, [
+    response = withings_api.get_measures(userid, [
         1,   # Weight (kg)
         5,   # Fat Free Mass (kg)
         6,   # Fat Ratio (%)
