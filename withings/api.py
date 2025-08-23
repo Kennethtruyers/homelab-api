@@ -3,7 +3,7 @@ import requests
 import workouts.notion as notion
 import workouts.data as data
 import os
-from withings.data import upsert_tokens, get_tokens
+from withings.data import upsert_tokens, get_tokens, upsert_measures
 import withings.withings_api  as withings_api
 from urllib.parse import parse_qs
 
@@ -68,6 +68,8 @@ async def notify(request: Request):
 
     print(response)
 
+    upsert_measures(response)
+
     return {"status": "ok"}
 
 @router.post("/fetch")
@@ -100,5 +102,7 @@ async def fetch(userid: str = Query(...)):
     ], None, None)
 
     print(response)
+
+    upsert_measures(response)
 
     return {"status": "ok"}
