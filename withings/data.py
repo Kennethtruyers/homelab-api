@@ -1,4 +1,4 @@
-from connections import get_connection
+from connections import get_connection, get_influx_client
 from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any, Iterable, Tuple
 import psycopg2.extras as extras
@@ -33,6 +33,10 @@ def init():
             """)
 
 def upsert_measures(rows: Iterable[Dict[str, Any]], userid : str, startdate: int, enddate: int) -> None:
+    upsert_measures_sql(rows, userid, startdate, enddate)
+    upsert_measures_influx(rows, userid, startdate, enddate)
+
+def upsert_measures_sql(rows: Iterable[Dict[str, Any]], userid : str, startdate: int, enddate: int) -> None:
     base_values = [_normalize_row(r) for r in rows]
     values = [(userid, *v) for v in base_values]
 
@@ -56,8 +60,66 @@ def upsert_measures(rows: Iterable[Dict[str, Any]], userid : str, startdate: int
 
              if values:
                 extras.execute_values(cur, insert_sql, values, template="(%s,%s,%s,%s,%s,%s,%s)", page_size=1000)
-                
+
         conn.commit()
+
+def upsert_measures_influx(
+    rows: Iterable[Dict[str, Any]],
+    userid: str,
+    startdate: int,
+    enddate: int) -> None:
+    """
+    InfluxDB 1.8 upsert: DELETE window for userid, then write points.
+    Measurement: withings
+      tags: userid, key, (optional) segment
+      fields: value (float), fm (int), algo (int)
+      time: r["timestamp"] (seconds)
+    """
+    client = get_influx_client("fitness")
+
+    # DELETE: InfluxQL needs RFC3339 times; end is exclusive, so add 1s
+    start_rfc = _rfc3339_utc(startdate)
+    end_rfc   = _rfc3339_utc(enddate + 1)
+    delete_q  = (
+        f'DELETE FROM "withings" '
+        f'WHERE time >= \'{start_rfc}\' AND time < \'{end_rfc}\' '
+        f'AND "userid" = \'{userid}\''
+    )
+    client.query(delete_q)
+
+    # WRITE: build points (JSON format). Preserve ints for fm/algo.
+    points: List[Dict[str, Any]] = []
+    for r in rows:
+        ts = int(r["timestamp"])
+        key = str(r["key"])
+        val = float(r["value"])
+        fm  = -1 if r.get("fm") is None else int(r["fm"])
+        algo = -1 if r.get("algo") is None else int(r["algo"])
+
+        tags = {"userid": userid, "key": key}
+        seg = r.get("segment")
+        if seg:
+            tags["segment"] = str(seg)
+
+        points.append({
+            "measurement": "withings",
+            "tags": tags,
+            "time": ts,  # seconds epoch
+            "fields": {
+                "value": val,
+                "fm": fm,
+                "algo": algo,
+                # optionally: "tz": str(r.get("timezone")) if you want it as a field
+            },
+        })
+
+    if points:
+        client.write_points(
+            points,
+            time_precision="s",
+            retention_policy=retention_policy,
+            batch_size=5000,
+        )
 
 def upsert_tokens(access_token: str, refresh_token: str, expires_in: int, user_id: str = "default"):
     """Insert or update tokens for a user"""
@@ -105,6 +167,9 @@ def _parse_iso8601(s: str | None) -> datetime | None:
         return dt
     except Exception:
         return None
+
+def _rfc3339_utc(ts: int) -> str:
+    return datetime.fromtimestamp(int(ts), tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 def _normalize_row(row: Dict[str, Any]) -> Tuple[int, str, int, int, datetime, float]:
     ts = int(row["timestamp"])
