@@ -117,7 +117,7 @@ def upsert_measures_influx(
         client.write_points(
             points,
             time_precision="s",
-            retention_policy=retention_policy,
+            retention_policy="autogen",
             batch_size=5000,
         )
 
