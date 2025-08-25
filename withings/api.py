@@ -101,8 +101,14 @@ async def fetch(userid: str = Query(...)):
         229, # Electrochemical Skin Conductance
     ], None, None)
 
+    if not response:
+        return {"status": "ok", "message": "no data", "count": 0}
+
+    startdate = int(min(r["timestamp"] for r in response))
+    enddate   = int(max(r["timestamp"] for r in response))
+
     print(response)
 
-    upsert_measures(response, userid)
+    upsert_measures(response, userid, startdate, enddate)
 
-    return {"status": "ok"}
+    return {"status": "ok", "count": len(rows), "startdate": startdate, "enddate": enddate}

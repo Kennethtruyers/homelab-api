@@ -32,11 +32,17 @@ def init():
                 );
             """)
 
-def upsert_measures(rows: Iterable[Dict[str, Any]], userid : str) -> None:
+def upsert_measures(rows: Iterable[Dict[str, Any]], userid : str, startdate: int, enddate: int) -> None:
     base_values = [_normalize_row(r) for r in rows]
     values = [(userid, *v) for v in base_values]
 
-    sql = """
+    delete_sql = """
+        DELETE FROM withings_measures
+        WHERE userid = %s
+        AND "timestamp" BETWEEN %s AND %s;
+    """
+
+    insert_sql = """
     INSERT INTO withings_measures ("timestamp","key",fm,algo,"datetime","value")
     VALUES %s
     ON CONFLICT ("timestamp","key",fm,algo) DO UPDATE
@@ -46,7 +52,11 @@ def upsert_measures(rows: Iterable[Dict[str, Any]], userid : str) -> None:
 
     with get_connection() as conn:
         with conn.cursor() as cur:
-            extras.execute_values(cur, sql, values, template="(%s,%s,%s,%s,%s,%s,%s)", page_size=1000)
+             cur.execute(delete_sql, (userid, startdate, enddate))
+
+             if values:
+                extras.execute_values(cur, insert_sql, values, template="(%s,%s,%s,%s,%s,%s,%s)", page_size=1000)
+                
         conn.commit()
 
 def upsert_tokens(access_token: str, refresh_token: str, expires_in: int, user_id: str = "default"):
