@@ -68,7 +68,7 @@ async def notify(request: Request):
 
     print(response)
 
-    upsert_measures(response, userid)
+    upsert_measures(response, data["userid"], data["startdate"], data["enddate"])
 
     return {"status": "ok"}
 
