@@ -47,7 +47,7 @@ def upsert_measures_sql(rows: Iterable[Dict[str, Any]], userid : str, startdate:
     """
 
     insert_sql = """
-    INSERT INTO withings_measures ("timestamp","key",fm,algo,"datetime","value")
+    INSERT INTO withings_measures (userid, "timestamp","key",fm,algo,"datetime","value")
     VALUES %s
     ON CONFLICT ("timestamp","key",fm,algo) DO UPDATE
       SET "datetime" = EXCLUDED."datetime",
