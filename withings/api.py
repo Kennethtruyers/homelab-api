@@ -68,7 +68,7 @@ async def notify(request: Request):
 
     print(response)
 
-    upsert_measures(response)
+    upsert_measures(response, userid)
 
     return {"status": "ok"}
 
@@ -103,6 +103,6 @@ async def fetch(userid: str = Query(...)):
 
     print(response)
 
-    upsert_measures(response)
+    upsert_measures(response, userid)
 
     return {"status": "ok"}

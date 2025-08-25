@@ -20,6 +20,7 @@ def init():
                     -- core identity (composite PK)
                     "timestamp" BIGINT NOT NULL,
                     "key"       TEXT   NOT NULL,
+                    userid      text NOT NULL,
                     fm          INTEGER NOT NULL DEFAULT -1,   -- None -> -1 sentinel
                     algo        INTEGER NOT NULL DEFAULT -1,   -- None -> -1 sentinel
 
@@ -27,12 +28,13 @@ def init():
                     "datetime"  TIMESTAMPTZ,
                     "value"     DOUBLE PRECISION NOT NULL,
 
-                    PRIMARY KEY ("timestamp", "key", fm, algo)
+                    PRIMARY KEY ("timestamp", "key", userid, fm, algo)
                 );
             """)
 
-def upsert_measures(rows: Iterable[Dict[str, Any]]) -> None:
-    values = [_normalize_row(r) for r in rows]
+def upsert_measures(rows: Iterable[Dict[str, Any]], userid : str) -> None:
+    base_values = [_normalize_row(r) for r in rows]
+    values = [(userid, *v) for v in base_values]
 
     sql = """
     INSERT INTO withings_measures ("timestamp","key",fm,algo,"datetime","value")
@@ -44,7 +46,7 @@ def upsert_measures(rows: Iterable[Dict[str, Any]]) -> None:
 
     with get_connection() as conn:
         with conn.cursor() as cur:
-            extras.execute_values(cur, sql, values, template="(%s,%s,%s,%s,%s,%s)", page_size=1000)
+            extras.execute_values(cur, sql, values, template="(%s,%s,%s,%s,%s,%s,%s)", page_size=1000)
         conn.commit()
 
 def upsert_tokens(access_token: str, refresh_token: str, expires_in: int, user_id: str = "default"):
