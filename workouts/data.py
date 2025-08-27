@@ -970,9 +970,4 @@ TAXONOMY_ROLLUP_VIEWS = """
     CREATE OR REPLACE VIEW vw_submuscle_timeseries AS
     SELECT "time", submuscle_name AS metric, value
     FROM vw_submuscle_daily_volume;
-
-    -- INDICES
-    CREATE INDEX IF NOT EXISTS idx_ex_daily_vol_d ON vw_exercise_daily_volume (d);
-    CREATE INDEX IF NOT EXISTS idx_map_ex ON exercise_target_map (exercise_name, exercise_variant);
-    CREATE INDEX IF NOT EXISTS idx_tax_path ON muscle_taxonomy (path);
 """
