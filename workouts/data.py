@@ -209,13 +209,13 @@ TAXONOMY_SQL = """
 EXERCISES_META = """
     CREATE TABLE IF NOT EXISTS exercise_meta (
     name    text NOT NULL,
-    variant text NOT NULL DEFAULT '',
+    variation text NOT NULL DEFAULT '',
     measurement_type text NOT NULL,   -- load | reps | hybrid | time | stretch
     variation_type   text NOT NULL,   -- minor | major
-    PRIMARY KEY (name, variant)
+    PRIMARY KEY (name, variation)
     );
 
-    INSERT INTO exercise_meta (name, variant, measurement_type, variation_type) VALUES
+    INSERT INTO exercise_meta (name, variation, measurement_type, variation_type) VALUES
     -- Biceps / forearms
     ('Bicep Curl','Incline','load','major'),
     ('Bicep Curl','Hammer','load','major'),
@@ -318,7 +318,7 @@ EXERCISES_META = """
 
     -- Misc
     ('Side Bend','', 'load','minor')
-    ON CONFLICT (name, variante)
+    ON CONFLICT (name, variation)
     DO UPDATE SET
     measurement_type = EXCLUDED.measurement_type,
     variation_type   = EXCLUDED.variation_type;
@@ -776,7 +776,7 @@ TAXONOMY_MAPPING_SQL = """
     ('Heel Drop','Bent Knee Single Leg','lower.calves.gastrocnemius.lateral',0.10)
     ON CONFLICT DO NOTHING;
 
-    -- Dips / Triceps accessory variants
+    -- Dips / Triceps accessory variation
     INSERT INTO exercise_target_map VALUES
     ('Kickbacks','', 'upper',1.0),
     ('Kickbacks','', 'upper.arms',1.0),
