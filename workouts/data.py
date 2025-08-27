@@ -330,7 +330,7 @@ TAXONOMY_MAPPING_SQL = """
     CREATE TABLE IF NOT EXISTS exercise_target_map (
         name    text NOT NULL,
         variation text NOT NULL DEFAULT '',
-        target_path      text NOT NULL REFERENCES target_taxonomy(path),
+        target_path      text NOT NULL REFERENCES muscle_taxonomy(path),
         contribution     numeric NOT NULL DEFAULT 1.0,  -- 0..1, sums can exceed 1.0 if you want overlapping credit
         PRIMARY KEY (name, variation, target_path),
         FOREIGN KEY (name, variation)
