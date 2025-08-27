@@ -37,6 +37,8 @@ def init():
 
             cur.execute(TAXONOMY_MAPPING_SQL)
 
+            cur.execute(TAXONOMY_ROLLUP_VIEWS)
+
 def create_workout(notion_id, date, personal_notes, coach_notes, metadata):
     with get_connection() as conn:
         with conn.cursor() as cur:
@@ -830,3 +832,147 @@ TAXONOMY_MAPPING_SQL = """
     ('Supine Pelvic Tilts','', 'core.deep.multifidus',0.30)
     ON CONFLICT DO NOTHING;
     """
+
+TAXONOMY_ROLLUP_VIEWS = """
+    -- BASE DAILY VOLUME
+    CREATE OR REPLACE VIEW vw_exercise_daily_volume AS
+        WITH sets AS (
+        SELECT
+            W.date::date                              AS d,
+            E.name                                    AS name,
+            COALESCE(E.variation, '')                 AS variation,
+            GREATEST(COALESCE(E.weight,0),0)::numeric AS weight,
+            GREATEST(COALESCE(E.reps,0),0)::numeric   AS reps
+        FROM workouts W
+        JOIN exercises E ON E.workout_notion_id = W.notion_id
+        )
+        SELECT
+        d,
+        name,
+        variation,
+        SUM(weight * reps)::numeric AS volume
+        FROM sets
+        GROUP BY d, name, variation;
+
+    -- DAILY VOLUME RAW
+    CREATE OR REPLACE VIEW vw_target_daily_volume_raw AS
+        SELECT
+        v.d,
+        m.target_path,
+        t.name                      AS target_name,
+        (v.volume * m.contribution) AS volume_contrib,
+        /* depth = number of segments in path (upper=1, upper.chest=2, …) */
+        COALESCE(NULLIF(array_length(string_to_array(m.target_path, '.'), 1),0),1) AS depth
+        FROM vw_exercise_daily_volume v
+        JOIN exercise_target_map m
+        ON m.name = v.name
+        AND m.variation = v.variation
+        JOIN target_taxonomy t
+        ON t.path = m.target_path;
+
+    -- REGION DAILY VOLUME
+    CREATE OR REPLACE VIEW vw_region_daily_volume AS
+        SELECT
+        d::timestamp                 AS "time",
+        target_name                  AS region,
+        SUM(volume_contrib)::numeric AS value
+        FROM vw_target_daily_volume_raw
+        WHERE depth = 1
+        GROUP BY d, target_name
+        ORDER BY d, target_name;
+
+    -- GROUP DAILY VOLUME
+    CREATE OR REPLACE VIEW vw_group_daily_volume AS
+        SELECT
+        d::timestamp                 AS "time",
+        target_path                  AS group_path,
+        target_name                  AS group_name,
+        SUM(volume_contrib)::numeric AS value
+        FROM vw_target_daily_volume_raw
+        WHERE depth = 2
+        GROUP BY d, target_path, target_name
+        ORDER BY d, group_path;
+    
+    -- MUSCLE DAILY VOLUME
+    CREATE OR REPLACE VIEW vw_muscle_daily_volume AS
+        SELECT
+        d::timestamp                 AS "time",
+        target_path                  AS muscle_path,
+        target_name                  AS muscle_name,
+        SUM(volume_contrib)::numeric AS value
+        FROM vw_target_daily_volume_raw
+        WHERE depth = 3
+        GROUP BY d, target_path, target_name
+        ORDER BY d, muscle_path;
+
+    -- SUB MUSCLE DAILY VOLUME
+    CREATE OR REPLACE VIEW vw_submuscle_daily_volume AS
+        SELECT
+        d::timestamp                 AS "time",
+        target_path                  AS submuscle_path,
+        target_name                  AS submuscle_name,
+        SUM(volume_contrib)::numeric AS value
+        FROM vw_target_daily_volume_raw
+        WHERE depth = 4
+        GROUP BY d, target_path, target_name
+        ORDER BY d, submuscle_path;
+
+    -- TAXONOMY SUB MUSCLES
+    CREATE OR REPLACE VIEW vw_taxonomy_submuscles AS
+        WITH parts AS (
+        SELECT
+            t.path,
+            t.name,
+            string_to_array(t.path, '.') AS segs
+        FROM target_taxonomy t
+        ),
+        ancestors AS (
+        SELECT
+            p.path,
+            p.name AS submuscle,
+            -- depth
+            array_length(segs,1) AS depth,
+            segs[1] AS region_key,
+            segs[2] AS group_key,
+            segs[3] AS muscle_key
+        FROM parts p
+        )
+        SELECT
+        r.name AS region,
+        g.name AS "group",
+        m.name AS muscle,
+        a.submuscle
+        FROM ancestors a
+        JOIN target_taxonomy r ON r.path = a.region_key
+        JOIN target_taxonomy g ON g.path = a.region_key || '.' || a.group_key
+        JOIN target_taxonomy m ON m.path = a.region_key || '.' || a.group_key || '.' || a.muscle_key
+        WHERE a.depth = 4   -- only include submuscle-level nodes
+        ORDER BY region, "group", muscle, submuscle;
+
+    -- TIME SERIES
+
+    -- Regions
+    CREATE OR REPLACE VIEW vw_region_timeseries AS
+    SELECT "time", region AS metric, value
+    FROM vw_region_daily_volume;
+
+    -- Groups (use readable metric)
+    CREATE OR REPLACE VIEW vw_group_timeseries AS
+    SELECT "time", group_name AS metric, value
+    FROM vw_group_daily_volume;
+
+    -- Muscles
+    CREATE OR REPLACE VIEW vw_muscle_timeseries AS
+    SELECT "time", muscle_name AS metric, value
+    FROM vw_muscle_daily_volume;
+
+    -- Sub-muscles / heads
+    CREATE OR REPLACE VIEW vw_submuscle_timeseries AS
+    SELECT "time", submuscle_name AS metric, value
+    FROM vw_submuscle_daily_volume;
+
+    -- INDICES
+    CREATE INDEX IF NOT EXISTS idx_ex_daily_vol_d ON vw_exercise_daily_volume (d);
+    CREATE INDEX IF NOT EXISTS idx_map_ex ON exercise_target_map (exercise_name, exercise_variant);
+    CREATE INDEX IF NOT EXISTS idx_tax_path ON target_taxonomy (path);
+"""
