@@ -867,7 +867,7 @@ TAXONOMY_ROLLUP_VIEWS = """
         JOIN exercise_target_map m
         ON m.name = v.name
         AND m.variation = v.variation
-        JOIN target_taxonomy t
+        JOIN muscle_taxonomy t
         ON t.path = m.target_path;
 
     -- REGION DAILY VOLUME
@@ -924,7 +924,7 @@ TAXONOMY_ROLLUP_VIEWS = """
             t.path,
             t.name,
             string_to_array(t.path, '.') AS segs
-        FROM target_taxonomy t
+        FROM muscle_taxonomy t
         ),
         ancestors AS (
         SELECT
@@ -943,9 +943,9 @@ TAXONOMY_ROLLUP_VIEWS = """
         m.name AS muscle,
         a.submuscle
         FROM ancestors a
-        JOIN target_taxonomy r ON r.path = a.region_key
-        JOIN target_taxonomy g ON g.path = a.region_key || '.' || a.group_key
-        JOIN target_taxonomy m ON m.path = a.region_key || '.' || a.group_key || '.' || a.muscle_key
+        JOIN muscle_taxonomy r ON r.path = a.region_key
+        JOIN muscle_taxonomy g ON g.path = a.region_key || '.' || a.group_key
+        JOIN muscle_taxonomy m ON m.path = a.region_key || '.' || a.group_key || '.' || a.muscle_key
         WHERE a.depth = 4   -- only include submuscle-level nodes
         ORDER BY region, "group", muscle, submuscle;
 
@@ -974,5 +974,5 @@ TAXONOMY_ROLLUP_VIEWS = """
     -- INDICES
     CREATE INDEX IF NOT EXISTS idx_ex_daily_vol_d ON vw_exercise_daily_volume (d);
     CREATE INDEX IF NOT EXISTS idx_map_ex ON exercise_target_map (exercise_name, exercise_variant);
-    CREATE INDEX IF NOT EXISTS idx_tax_path ON target_taxonomy (path);
+    CREATE INDEX IF NOT EXISTS idx_tax_path ON muscle_taxonomy (path);
 """
