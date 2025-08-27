@@ -222,11 +222,13 @@ EXERCISES_META = """
     ('Bicep Curl','Standing','load','minor'),
     ('Bicep Curl','Hammer Incline','load','major'),
     ('Bicep Curl','Zottman','load','major'),
+    ('Bicep Curl','','load','major'),
     ('Reverse Curl','', 'load','minor'),
     ('Reverse wrist curl','', 'load','minor'),
     ('Seated Forearm Curl','', 'load','minor'),
 
     -- Rows / pulls
+    ('One-Arm Row','','load','minor'),
     ('One-Arm Row','Flared','load','minor'),
     ('One-Arm Row','Pronated','load','minor'),
     ('One-Arm Row','Normal','load','minor'),
@@ -247,6 +249,7 @@ EXERCISES_META = """
     ('Wall/Floor Glides','', 'stretch','minor'),
 
     -- Chest
+    ('Bench Press','','load','major'),
     ('Bench Press','Flat','load','major'),
     ('Bench Press','Incline','load','major'),
     ('Floor Press','', 'load','major'),
@@ -277,6 +280,7 @@ EXERCISES_META = """
     ('Dead Bug','', 'reps','minor'),
     ('Hanging Leg Raise','', 'reps','minor'),
     ('Leg raises','', 'reps','minor'),
+    ('Leg raises','Incline', 'reps','minor'),
     ('Incline Leg Raise','', 'reps','major'),
 
     -- Planks / holds (time-based)
