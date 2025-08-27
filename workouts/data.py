@@ -825,4 +825,4 @@ TAXONOMY_MAPPING_SQL = """
     ('Supine Pelvic Tilts','', 'core.deep.transversus_abdominis',0.70),
     ('Supine Pelvic Tilts','', 'core.deep.multifidus',0.30)
     ON CONFLICT DO NOTHING;
-
+    """
