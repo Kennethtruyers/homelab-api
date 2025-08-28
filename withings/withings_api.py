@@ -40,10 +40,10 @@ TYPE_MAP: Dict[int, str] = {
 
 POSITION_MAP: Dict[int, str] = {
     12: "trunk",
-    10: "left leg",
-    11: "right leg",
-    2: "left_arm",
-    3: "right_arm",
+    10: "left_leg",
+    11: "right_ leg",
+    3: "left_arm",
+    2: "right_arm",
     7: "body"
 }
 
