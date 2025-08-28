@@ -38,6 +38,15 @@ TYPE_MAP: Dict[int, str] = {
     229: "electrochemical_skin_conductance",
 }
 
+POSITION_MAP: Dict[int, str] = {
+    12: "trunk",
+    10: "left leg",
+    11: "right leg",
+    2: "left_arm",
+    3: "right_arm",
+    7: "body"
+}
+
 def subscribe(user_id : str, appli : int, url: str):
     send_authenticated_request("/notify", {
         "action": "subscribe",
@@ -81,9 +90,7 @@ def get_measures(user_id, meastypes : list[int], startdate : int, enddate: int):
 
     return parse_measure_groups(all_groups)
 
-def parse_measure_groups(
-    merged_body: list[Any],
-    type_map: Dict[int, str] = TYPE_MAP
+def parse_measure_groups(merged_body: list[Any]
 ) -> list[Dict[str, Any]]:
     rows: list[Dict[str, Any]] = []
 
@@ -97,13 +104,15 @@ def parse_measure_groups(
 
         for m in grp.get("measures", []):
             m_type = m.get("type")
+            m_position = m.get("position", 0)
             m_val = m.get("value")
             m_unit = m.get("unit", 0)
             if m_type is None or m_val is None:
                 continue
 
             normalized = float(m_val) * (10.0 ** m_unit)
-            field_name = type_map.get(m_type, f"type_{m_type}")
+            field_name = key_for_measure(m_type, m_position)
+
 
             row = {
                 "datetime": dt_str,
@@ -116,6 +125,14 @@ def parse_measure_groups(
             rows.append(row)
 
     return rows
+
+def label_for_segment(position: int) -> str:
+    return POSITION_MAP.get(position, None)
+
+def key_for_measure(mtype: int, position: int) -> str:
+    base = TYPE_MAP.get(mtype, f"type_{mtype}")
+    seg = label_for_segment(position)
+    return f"{base}.{seg}" if seg else base
 
 def get_token_from_code(code: str) -> Dict[str, Any]:
     payload = {
