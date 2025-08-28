@@ -135,9 +135,10 @@ TAXONOMY_SQL = """
     ('upper.back.latissimus_dorsi','Latissimus Dorsi','upper.back'),
     ('upper.back.teres_major','Teres Major','upper.back'),
     ('upper.back.rhomboids','Rhomboids','upper.back'),
-    ('upper.back.trapezius.upper','Trapezius Upper','upper.traps'),
-    ('upper.back.trapezius.middle','Trapezius Middle','upper.traps'),
-    ('upper.back.trapezius.lower','Trapezius Lower','upper.traps'),
+    ('upper.back.trapezius','Trapezius','upper.back'),
+    ('upper.back.trapezius.upper','Trapezius Upper','upper.back.trapezius'),
+    ('upper.back.trapezius.middle','Trapezius Middle','upper.back.trapezius'),
+    ('upper.back.trapezius.lower','Trapezius Lower','upper.back.trapezius'),
     ('upper.back.levator_scapulae','Levator Scapulae','upper.back'),
 
     -- Shoulders
@@ -145,10 +146,11 @@ TAXONOMY_SQL = """
     ('upper.shoulders.deltoid.anterior','Anterior Deltoid','upper.shoulders.deltoid'),
     ('upper.shoulders.deltoid.lateral','Lateral Deltoid','upper.shoulders.deltoid'),
     ('upper.shoulders.deltoid.posterior','Posterior Deltoid','upper.shoulders.deltoid'),
-    ('upper.shoulders.rotator_cuff.supraspinatus','Supraspinatus','upper.shoulders'),
-    ('upper.shoulders.rotator_cuff.infraspinatus','Infraspinatus','upper.shoulders'),
-    ('upper.shoulders.rotator_cuff.teres_minor','Teres Minor','upper.shoulders'),
-    ('upper.shoulders.rotator_cuff.subscapularis','Subscapularis','upper.shoulders'),
+    ('upper.shoulders.rotator_cuff','Rotator Cuff','upper.shoulders'),
+    ('upper.shoulders.rotator_cuff.supraspinatus','Supraspinatus','upper.shoulders.rotator_cuff'),
+    ('upper.shoulders.rotator_cuff.infraspinatus','Infraspinatus','upper.shoulders.rotator_cuff'),
+    ('upper.shoulders.rotator_cuff.teres_minor','Teres Minor','upper.shoulders.rotator_cuff'),
+    ('upper.shoulders.rotator_cuff.subscapularis','Subscapularis','upper.shoulders.rotator_cuff'),
 
     -- Arms
     ('upper.arms.biceps_brachii','Biceps Brachii','upper.arms'),
@@ -174,8 +176,9 @@ TAXONOMY_SQL = """
     ('lower.quads.vastus_intermedius','Vastus Intermedius','lower.quads'),
 
     -- Lower body: hamstrings
-    ('lower.hamstrings.biceps_femoris.long_head','Biceps Femoris Long Head','lower.hamstrings'),
-    ('lower.hamstrings.biceps_femoris.short_head','Biceps Femoris Short Head','lower.hamstrings'),
+    ('lower.hamstrings.biceps_femoris','Biceps Femoris','lower.hamstrings'),
+    ('lower.hamstrings.biceps_femoris.long_head','Biceps Femoris Long Head','lower.hamstrings.biceps_femoris'),
+    ('lower.hamstrings.biceps_femoris.short_head','Biceps Femoris Short Head','lower.hamstrings.biceps_femoris'),
     ('lower.hamstrings.semitendinosus','Semitendinosus','lower.hamstrings'),
     ('lower.hamstrings.semimembranosus','Semimembranosus','lower.hamstrings'),
 
@@ -185,8 +188,9 @@ TAXONOMY_SQL = """
     ('lower.glutes.gluteus_minimus','Gluteus Minimus','lower.glutes'),
 
     -- Lower body: calves
-    ('lower.calves.gastrocnemius.medial','Gastrocnemius Medial','lower.calves'),
-    ('lower.calves.gastrocnemius.lateral','Gastrocnemius Lateral','lower.calves'),
+    ('lower.calves.gastrocnemius','Gastrocnemius','lower.calves'),
+    ('lower.calves.gastrocnemius.medial','Gastrocnemius Medial','lower.calves.gastrocnemius'),
+    ('lower.calves.gastrocnemius.lateral','Gastrocnemius Lateral','lower.calves.gastrocnemius'),
     ('lower.calves.soleus','Soleus','lower.calves'),
 
     -- Lower body: adductors
@@ -918,36 +922,35 @@ TAXONOMY_ROLLUP_VIEWS = """
         ORDER BY d, submuscle_path;
 
     -- TAXONOMY SUB MUSCLES
-    CREATE OR REPLACE VIEW vw_taxonomy_submuscles AS
-        WITH parts AS (
+    -- Leaf = node with no children. We include depth >= 3 so every row
+    -- has region, group, and at least a muscle. Depth-3 leaves get submuscle = NULL.
+    CREATE OR REPLACE VIEW vw_taxonomy_leaf_nodes AS
+    WITH leaves AS (
         SELECT
             t.path,
             t.name,
-            string_to_array(t.path, '.') AS segs
+            array_length(string_to_array(t.path, '.'), 1) AS depth,
+            split_part(t.path, '.', 1) AS s1,  -- region key
+            split_part(t.path, '.', 2) AS s2,  -- group key
+            split_part(t.path, '.', 3) AS s3,  -- muscle key (if present)
+            split_part(t.path, '.', 4) AS s4   -- submuscle key (if present)
         FROM muscle_taxonomy t
-        ),
-        ancestors AS (
-        SELECT
-            p.path,
-            p.name AS submuscle,
-            -- depth
-            array_length(segs,1) AS depth,
-            segs[1] AS region_key,
-            segs[2] AS group_key,
-            segs[3] AS muscle_key
-        FROM parts p
+        WHERE NOT EXISTS (
+            SELECT 1 FROM muscle_taxonomy c WHERE c.parent_path = t.path
+        )
+            AND array_length(string_to_array(t.path, '.'), 1) >= 3
         )
         SELECT
         r.name AS region,
         g.name AS "group",
         m.name AS muscle,
-        a.submuscle
-        FROM ancestors a
-        JOIN muscle_taxonomy r ON r.path = a.region_key
-        JOIN muscle_taxonomy g ON g.path = a.region_key || '.' || a.group_key
-        JOIN muscle_taxonomy m ON m.path = a.region_key || '.' || a.group_key || '.' || a.muscle_key
-        WHERE a.depth = 4   -- only include submuscle-level nodes
+        CASE WHEN l.depth = 4 THEN l.name ELSE NULL END AS submuscle
+        FROM leaves l
+        JOIN muscle_taxonomy r ON r.path = l.s1
+        JOIN muscle_taxonomy g ON g.path = l.s1 || '.' || l.s2
+        JOIN muscle_taxonomy m ON m.path = l.s1 || '.' || l.s2 || '.' || l.s3
         ORDER BY region, "group", muscle, submuscle;
+
 
     -- TIME SERIES
 
@@ -970,4 +973,91 @@ TAXONOMY_ROLLUP_VIEWS = """
     CREATE OR REPLACE VIEW vw_submuscle_timeseries AS
     SELECT "time", submuscle_name AS metric, value
     FROM vw_submuscle_daily_volume;
+
+    CREATE OR REPLACE VIEW vw_exercise_daily_sets AS
+        SELECT
+        W.date::date             AS d,
+        E.name                   AS name,
+        COALESCE(E.variation,'') AS variation,
+        COUNT(*)                 AS sets
+        FROM workouts W
+        JOIN exercises E ON E.workout_notion_id = W.notion_id
+        GROUP BY W.date::date, E.name, E.variation;
+
+    CREATE OR REPLACE VIEW vw_target_daily_sets_raw AS
+        SELECT
+        v.d,
+        m.target_path,
+        t.name      AS target_name,
+        (v.sets * m.contribution)::numeric AS sets_contrib,
+        array_length(string_to_array(m.target_path,'.'),1) AS depth
+        FROM vw_exercise_daily_sets v
+        JOIN exercise_target_map m
+        ON m.name = v.name
+        AND m.variation = v.variation
+        JOIN muscle_taxonomy t
+        ON t.path = m.target_path;
+
+    CREATE OR REPLACE VIEW vw_region_daily_sets AS
+        SELECT
+        d::timestamp AS "time",
+        target_name  AS region,
+        SUM(sets_contrib)::numeric AS value
+        FROM vw_target_daily_sets_raw
+        WHERE depth = 1
+        GROUP BY d, target_name
+        ORDER BY d, target_name;
+
+    CREATE OR REPLACE VIEW vw_group_daily_sets AS
+        SELECT
+        d::timestamp AS "time",
+        target_name  AS "group",
+        SUM(sets_contrib)::numeric AS value
+        FROM vw_target_daily_sets_raw
+        WHERE depth = 2
+        GROUP BY d, target_name
+        ORDER BY d, target_name;
+
+    CREATE OR REPLACE VIEW vw_muscle_daily_sets AS
+        WITH raw AS (
+        SELECT
+            r.d,
+            r.target_path,
+            r.sets_contrib,
+            array_length(string_to_array(r.target_path,'.'),1) AS depth
+        FROM vw_target_daily_sets_raw r
+        )
+        , muskey AS (
+        SELECT
+            d,
+            -- if depth=3, keep as-is; if depth=4, trim to first 3 segments
+            CASE
+            WHEN depth = 3 THEN target_path
+            WHEN depth = 4 THEN
+                split_part(target_path,'.',1) || '.' ||
+                split_part(target_path,'.',2) || '.' ||
+                split_part(target_path,'.',3)
+            END AS muscle_path,
+            sets_contrib
+        FROM raw
+        WHERE depth IN (3,4)   -- only muscle-level and submuscle-level entries
+        )
+        SELECT
+        m.d::timestamp                     AS "time",
+        t.name                             AS muscle,
+        SUM(m.sets_contrib)::numeric       AS value
+        FROM muskey m
+        JOIN muscle_taxonomy t ON t.path = m.muscle_path
+        GROUP BY m.d, t.name
+        ORDER BY "time", muscle;
+
+    CREATE OR REPLACE VIEW vw_submuscle_daily_sets AS
+        SELECT
+        d::timestamp AS "time",
+        target_name  AS submuscle,
+        SUM(sets_contrib)::numeric AS value
+        FROM vw_target_daily_sets_raw
+        WHERE depth = 4
+        GROUP BY d, target_name
+        ORDER BY d, target_name;
 """
