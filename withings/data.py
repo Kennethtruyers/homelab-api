@@ -21,14 +21,12 @@ def init():
                     "timestamp" BIGINT NOT NULL,
                     "key"       TEXT   NOT NULL,
                     userid      text NOT NULL,
-                    fm          INTEGER NOT NULL DEFAULT -1,   -- None -> -1 sentinel
-                    algo        INTEGER NOT NULL DEFAULT -1,   -- None -> -1 sentinel
 
                     -- payload
                     "datetime"  TIMESTAMPTZ,
                     "value"     DOUBLE PRECISION NOT NULL,
 
-                    PRIMARY KEY ("timestamp", "key", userid, fm, algo)
+                    PRIMARY KEY ("timestamp", "key", userid)
                 );
             """)
 
@@ -47,9 +45,9 @@ def upsert_measures_sql(rows: Iterable[Dict[str, Any]], userid : str, startdate:
     """
 
     insert_sql = """
-    INSERT INTO withings_measures (userid, "timestamp","key",fm,algo,"datetime","value")
+    INSERT INTO withings_measures (userid, "timestamp","key","datetime","value")
     VALUES %s
-    ON CONFLICT (userid, "timestamp","key",fm,algo) DO UPDATE
+    ON CONFLICT (userid, "timestamp","key") DO UPDATE
       SET "datetime" = EXCLUDED."datetime",
           "value"    = EXCLUDED."value";
     """
@@ -72,7 +70,7 @@ def upsert_measures_influx(
     InfluxDB 1.8 upsert: DELETE window for userid, then write points.
     Measurement: withings
       tags: userid, key, (optional) segment
-      fields: value (float), fm (int), algo (int)
+      fields: value (float)
       time: r["timestamp"] (seconds)
     """
     client = get_influx_client("fitness")
@@ -87,15 +85,13 @@ def upsert_measures_influx(
     )
     client.query(delete_q)
 
-    # WRITE: build points (JSON format). Preserve ints for fm/algo.
+    # WRITE: build points (JSON format). 
     points: List[Dict[str, Any]] = []
     for r in rows:
         ts = int(r["timestamp"])
         key = str(r["key"])
         val = float(r["value"])
-        fm  = -1 if r.get("fm") is None else int(r["fm"])
-        algo = -1 if r.get("algo") is None else int(r["algo"])
-
+        
         tags = {"userid": userid, "key": key}
         seg = r.get("segment")
         if seg:
@@ -107,9 +103,6 @@ def upsert_measures_influx(
             "time": ts,  # seconds epoch
             "fields": {
                 "value": val,
-                "fm": fm,
-                "algo": algo,
-                # optionally: "tz": str(r.get("timezone")) if you want it as a field
             },
         })
 
@@ -174,15 +167,11 @@ def _rfc3339_utc(ts: int) -> str:
 def _normalize_row(row: Dict[str, Any]) -> Tuple[int, str, int, int, datetime, float]:
     ts = int(row["timestamp"])
     key = str(row["key"])
-    fm = row.get("fm", -1)
-    algo = row.get("algo", -1)
-    fm = -1 if fm is None else int(fm)
-    algo = -1 if algo is None else int(algo)
-
+    
     # Prefer provided ISO datetime; otherwise derive from timestamp
     dt = _parse_iso8601(row.get("datetime"))
     if dt is None:
         dt = datetime.fromtimestamp(ts, tz=timezone.utc)
 
     value = float(row["value"])
-    return ts, key, fm, algo, dt, value
+    return ts, key, dt, value

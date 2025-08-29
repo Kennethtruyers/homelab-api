@@ -31,6 +31,7 @@ TYPE_MAP: Dict[int, str] = {
     168: "extracellular_water_kg",
     169: "intracellular_water_kg",
     170: "visceral_fat_index",
+    173: "segmental_fat_free_mass",
     174: "segmental_fat_mass",              # per-limb/trunk values
     175: "segmental_muscle_mass",           # per-limb/trunk values
     196: "electrodermal_activity_feet",
@@ -39,12 +40,12 @@ TYPE_MAP: Dict[int, str] = {
 }
 
 POSITION_MAP: Dict[int, str] = {
-    12: "trunk",
+    2: "right_arm",
+    3: "left_arm",
+    7: "body",
     10: "left_leg",
     11: "right_ leg",
-    3: "left_arm",
-    2: "right_arm",
-    7: "body"
+    12: "trunk"
 }
 
 def subscribe(user_id : str, appli : int, url: str):
@@ -118,9 +119,7 @@ def parse_measure_groups(merged_body: list[Any]
                 "datetime": dt_str,
                 "timestamp": ts,
                 "key": field_name,
-                "value": normalized,
-                "fm": m.get("fm", None),
-                "algo": m.get("algo", None)
+                "value": normalized
             }
             rows.append(row)
 

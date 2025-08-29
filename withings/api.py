@@ -94,6 +94,7 @@ async def fetch(userid: str = Query(...)):
         168, # Extracellular Water (kg)
         169, # Intracellular Water (kg)
         170, # Visceral Fat (index, unitless)
+        173, # Segmental Lean Mass (arms, legs, trunk) 
         174, # Segmental Fat Mass (arms, legs, trunk)
         175, # Segmental Muscle Mass (arms, legs, trunk)
         196, # Electrodermal Activity (feet)
