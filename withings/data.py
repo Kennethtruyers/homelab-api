@@ -1,7 +1,12 @@
 from connections import get_connection, get_influx_client
 from datetime import datetime, timedelta, timezone
-from typing import List, Dict, Any, Iterable, Tuple
+from typing import Iterable, Dict, Any, List, DefaultDict, Tuple
+from collections import defaultdict
 import psycopg2.extras as extras
+import psycopg2
+from psycopg2.extras import DictCursor
+import math
+import re
 
 def init():
     with get_connection() as conn:
@@ -61,58 +66,153 @@ def upsert_measures_sql(rows: Iterable[Dict[str, Any]], userid : str, startdate:
 
         conn.commit()
 
+from typing import Iterable, Dict, Any, List, DefaultDict
+from collections import defaultdict
+import math, re
+
+def _normalize_field_name(s: str) -> str:
+    s = str(s).strip().lower()
+    s = re.sub(r"[^\w]+", "_", s)
+    s = re.sub(r"_+", "_", s)
+    return s.strip("_")
+
 def upsert_measures_influx(
     rows: Iterable[Dict[str, Any]],
     userid: str,
     startdate: int,
-    enddate: int) -> None:
+    enddate: int,
+    *,
+    delete_window: bool = True,
+    retention_policy: str = "autogen",
+    batch_size: int = 5000,
+) -> None:
     """
-    InfluxDB 1.8 upsert: DELETE window for userid, then write points.
+    InfluxDB 1.8 upsert: DELETE window for userid (optional), then write points.
+
     Measurement: withings
-      tags: userid, key, (optional) segment
-      fields: value (float)
+      tags: userid
+      fields: one per key
       time: r["timestamp"] (seconds)
     """
     client = get_influx_client("fitness")
 
-    # DELETE: InfluxQL needs RFC3339 times; end is exclusive, so add 1s
-    start_rfc = _rfc3339_utc(startdate)
-    end_rfc   = _rfc3339_utc(enddate + 1)
-    delete_q  = (
-        f'DELETE FROM "withings" '
-        f'WHERE time >= \'{start_rfc}\' AND time < \'{end_rfc}\' '
-        f'AND "userid" = \'{userid}\''
-    )
-    client.query(delete_q)
+    if delete_window:
+        # DELETE: InfluxQL needs RFC3339 times; end is exclusive, so add 1s
+        start_rfc = _rfc3339_utc(startdate)
+        end_rfc   = _rfc3339_utc(enddate + 1)
+        delete_q  = (
+            f'DELETE FROM "withings" '
+            f'WHERE time >= \'{start_rfc}\' AND time < \'{end_rfc}\' '
+            f'AND "userid" = \'{userid}\''
+        )
+        client.query(delete_q)
 
-    # WRITE: build points (JSON format). 
-    points: List[Dict[str, Any]] = []
+    # Group into one point per timestamp
+    grouped: DefaultDict[int, Dict[str, float]] = defaultdict(dict)
+
     for r in rows:
-        ts = int(r["timestamp"])
-        key = str(r["key"])
-        val = float(r["value"])
-        
-        tags = {"userid": userid, "key": key}
-        seg = r.get("segment")
-        if seg:
-            tags["segment"] = str(seg)
+        ts_raw = r.get("timestamp")
+        key_raw = r.get("key")
+        val_raw = r.get("value")
+        if ts_raw is None or key_raw is None or val_raw is None:
+            continue
+        try:
+            ts = int(ts_raw)
+            val = float(val_raw)
+        except (ValueError, TypeError):
+            continue
+        if math.isnan(val) or math.isinf(val):
+            continue
 
+        field = _normalize_field_name(key_raw)
+
+        if not field:
+            continue
+
+        grouped[ts][field] = val
+
+    # Emit points
+    points: List[Dict[str, Any]] = []
+    for ts, fields in grouped.items():
+        if not fields:
+            continue
         points.append({
             "measurement": "withings",
-            "tags": tags,
-            "time": ts,  # seconds epoch
-            "fields": {
-                "value": val,
-            },
+            "tags": {"userid": userid},
+            "time": ts,
+            "fields": fields,
         })
 
     if points:
         client.write_points(
             points,
             time_precision="s",
-            retention_policy="autogen",
-            batch_size=5000,
+            retention_policy=retention_policy,
+            batch_size=batch_size,
         )
+
+
+
+def full_resync_measures_from_postgres() -> None:
+    influx = get_influx_client("fitness")
+    delete_q = 'DELETE FROM "withings"'  # all users (whole measurement in RP)
+    influx.query(delete_q)
+
+    # 2) Stream from Postgres
+    with get_connection() as conn:
+        with conn.cursor(name="withings_stream", cursor_factory=DictCursor) as cur:
+            base_sql = """
+                SELECT 
+                    CAST(timestamp AS BIGINT)     AS timestamp,
+                    key::text                     AS key,
+                    value::float                  AS value,
+                    userid::text                  AS userid
+                FROM withings_measures
+                ORDER BY userid, timestamp
+            """
+            
+
+            cur.execute(base_sql)
+
+            buffer: list[dict[str, any]] = []
+            current_user: str | None = None
+
+            def flush_buffer(u: str | None):
+                if not buffer:
+                    return
+                # Since we wiped Influx already, skip the delete window inside the writer
+                # We still need start/end to satisfy signature; values are ignored with delete_window=False
+                upsert_measures_influx(
+                    rows=buffer,
+                    userid=u,               # u is not None here
+                    startdate=0,
+                    enddate=0,
+                    delete_window=False,
+                    retention_policy="autogen",
+                )
+                buffer.clear()
+
+            for row in cur:
+                u = row["userid"]
+                if current_user is None:
+                    current_user = u
+                # If we switch users, flush the prior buffer so tagging is correct
+                if u != current_user:
+                    flush_buffer(current_user)
+                    current_user = u
+
+                buffer.append({
+                    "timestamp": row["timestamp"],
+                    "key": row["key"],
+                    "value": row["value"],
+                })
+
+                if len(buffer) >= 50_000:
+                    flush_buffer(current_user)
+
+            # Flush last chunk
+            flush_buffer(current_user)
+
 
 def upsert_tokens(access_token: str, refresh_token: str, expires_in: int, user_id: str = "default"):
     """Insert or update tokens for a user"""
@@ -175,3 +275,13 @@ def _normalize_row(row: Dict[str, Any]) -> Tuple[int, str, int, int, datetime, f
 
     value = float(row["value"])
     return ts, key, dt, value
+
+def _normalize_field_name(s: str) -> str:
+    """
+    Make a safe-ish InfluxDB field key: lowercase, strip, replace non-word with underscores,
+    collapse repeats, strip leading/trailing underscores.
+    """
+    s = str(s).strip().lower()
+    s = re.sub(r"[^\w]+", "_", s)
+    s = re.sub(r"_+", "_", s)
+    return s.strip("_")

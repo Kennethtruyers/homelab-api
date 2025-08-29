@@ -3,7 +3,7 @@ import requests
 import workouts.notion as notion
 import workouts.data as data
 import os
-from withings.data import upsert_tokens, get_tokens, upsert_measures
+from withings.data import upsert_tokens, get_tokens, upsert_measures, full_resync_measures_from_postgres
 import withings.withings_api  as withings_api
 from urllib.parse import parse_qs
 
@@ -113,3 +113,7 @@ async def fetch(userid: str = Query(...)):
     upsert_measures(response, userid, startdate, enddate)
 
     return {"status": "ok", "count": len(rows), "startdate": startdate, "enddate": enddate}
+
+@router.post("/resync-postgres-influx")
+async def resync():
+    full_resync_measures_from_postgres()
