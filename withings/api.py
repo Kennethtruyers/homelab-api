@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Request, Query, Response
 import requests
 import workouts.notion as notion
 import workouts.data as data
@@ -30,7 +30,6 @@ async def set_notifications(userid: str = Query(...)):
 @router.api_route("/notify", methods=["POST", "HEAD"])
 async def notify(request: Request):
     if request.method == "HEAD":
-        # Withings (and other webhook providers) sometimes ping with HEAD
         return Response(status_code=200)
 
     raw = await request.body()
@@ -39,41 +38,13 @@ async def notify(request: Request):
 
     print(data)
 
-    response = withings_api.get_measures(data["userid"], [
-        1,   # Weight (kg)
-        5,   # Fat Free Mass (kg)
-        6,   # Fat Ratio (%)
-        8,   # Fat Mass Weight (kg)
-        11,  # Heart Pulse (bpm, standing HR from scale)
-        76,  # Muscle Mass (kg)
-        77,  # Hydration / Total Body Water (kg)
-        88,  # Bone Mass (kg)
-        91,  # Pulse Wave Velocity (m/s)
-        130, # Atrial fibrillation result (ECG)
-        135, # QRS interval duration (ECG)
-        136, # PR interval duration (ECG)
-        137, # QT interval duration (ECG)
-        138, # Corrected QT interval duration (ECG)
-        155, # Vascular age (derived from PWV)
-        167, # Nerve Health Score / Conductance (feet electrodes)
-        168, # Extracellular Water (kg)
-        169, # Intracellular Water (kg)
-        170, # Visceral Fat (index, unitless)
-        174, # Segmental Fat Mass (arms, legs, trunk)
-        175, # Segmental Muscle Mass (arms, legs, trunk)
-        196, # Electrodermal Activity (feet)
-        226, # Basal Metabolic Rate (BMR)
-        229, # Electrochemical Skin Conductance
-    ], data["startdate"], data["enddate"])
-
-    print(response)
-
-    upsert_measures(response, data["userid"], int(data["startdate"]), int(data["enddate"]))
-
-    return {"status": "ok"}
+    return upsert(data["userid"], int(data["startdate"]), int(data["enddate"]))
 
 @router.post("/fetch")
-async def fetch(userid: str = Query(...)):
+async def fetch(userid: str = Query(...), startdate: str = Query(...), enddate: str = Query(...)):
+    return upsert(userid, startdate, enddate)
+
+def upsert(userid, startdate, enddate):
     response = withings_api.get_measures(userid, [
         1,   # Weight (kg)
         5,   # Fat Free Mass (kg)
@@ -105,14 +76,12 @@ async def fetch(userid: str = Query(...)):
     if not response:
         return {"status": "ok", "message": "no data", "count": 0}
 
-    startdate = int(min(r["timestamp"] for r in response))
-    enddate   = int(max(r["timestamp"] for r in response))
-
     print(response)
 
-    upsert_measures(response, userid, startdate, enddate)
+    upsert_measures(response, userid, int(startdate), int(enddate))
 
-    return {"status": "ok", "count": len(rows), "startdate": startdate, "enddate": enddate}
+    return {"status": "ok"}
+
 
 @router.post("/resync-postgres-influx")
 async def resync():
