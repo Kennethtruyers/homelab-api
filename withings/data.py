@@ -62,7 +62,7 @@ def upsert_measures_sql(rows: Iterable[Dict[str, Any]], userid : str, startdate:
              cur.execute(delete_sql, (userid, startdate, enddate))
 
              if values:
-                extras.execute_values(cur, insert_sql, values, template="(%s,%s,%s,%s,%s,%s,%s)", page_size=1000)
+                extras.execute_values(cur, insert_sql, values, template="(%s,%s,%s,%s,%s)", page_size=1000)
 
         conn.commit()
 
