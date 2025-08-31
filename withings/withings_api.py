@@ -44,7 +44,7 @@ POSITION_MAP: Dict[int, str] = {
     3: "left_arm",
     7: "body",
     10: "left_leg",
-    11: "right_ leg",
+    11: "right_leg",
     12: "trunk"
 }
 
