@@ -18,10 +18,10 @@ router = APIRouter()
 # ---------- Models ----------
 
 class IntervalUnit(str, Enum):
-    days = "days"
-    weeks = "weeks"
-    months = "months"
-    years = "years"
+    days = "day"
+    weeks = "week"
+    months = "month"
+    years = "year"
 
 
 class UpsertSingleItemRequest(BaseModel):
