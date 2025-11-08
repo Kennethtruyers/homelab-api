@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
 from typing import Iterable, List, Optional, Tuple
-from psycopg2 import sql
+from psycopg2 import sql, RealDictCursor
 import psycopg2
 
 
