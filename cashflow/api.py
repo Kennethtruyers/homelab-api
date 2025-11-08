@@ -54,10 +54,10 @@ class UpsertRecurringItemRequest(BaseModel):
     def quantize_amount(cls, v: Decimal) -> Decimal:
         return v.quantize(Decimal("0.01"))
 
-    @validator("date_to")
+    @validator("dateTo")
     def validate_date_range(cls, v: Optional[date], values) -> Optional[date]:
-        if v and "date_from" in values and v < values["date_from"]:
-            raise ValueError("date_to cannot be before date_from")
+        if v and "dateFrom" in values and v < values["dateFrom"]:
+            raise ValueError("date_to cannot be before dateFrom")
         return v
 
 
