@@ -138,6 +138,6 @@ def edit_current_values_api(payload: EditCurrentValuesRequest):
     )
     return {"status": "ok"}
 
-@app.get("/account-movements")
+@router.get("/account-movements")
 def get_account_movements():
     return fetch_account_movements()
