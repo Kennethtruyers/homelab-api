@@ -125,7 +125,7 @@ def init():
                 -- opening bank balance + running bank deltas from range_start
                 cv.bank_account_amount
                     + SUM(CASE WHEN c.type = 'Bank Account' THEN c.amount ELSE 0 END)
-                        OVER (ORDER BY c.date)     AS "Bank Account"
+                        OVER (ORDER BY c.date)     AS "BankAccount"
                 
                 FROM combined_items c
                 CROSS JOIN cv
@@ -264,4 +264,24 @@ def update_current_values(
                 """,
                 (bank_account_amount, cash_amount, range_start, range_end),
             )
-    conn.commit()          
+    conn.commit()      
+
+
+def fetch_account_movements() -> List[Dict[str, Any]]:
+    sql = """
+        SELECT
+            date,
+            category,
+            description,
+            type,
+            amount,
+            "Cash",
+            "Bank Account"
+        FROM account_movements
+        ORDER BY date;
+    """
+    with get_cashflow_connection() as conn:
+        with conn.cursor(row_factory=psycopg2.rows.dict_row) as cur:
+            cur.execute(sql)
+            rows = cur.fetchall()
+            return [dict(r) for r in rows]
