@@ -37,6 +37,7 @@ class UpsertSingleItemRequest(BaseModel):
     type: str
     amount: Decimal = Field(..., description="Negative for expenses, positive for income.")
     enabled: bool = Field(True, description="Whether this item is active.")
+    accountId: UUID
 
     @validator("amount")
     def quantize_amount(cls, v: Decimal) -> Decimal:
@@ -54,6 +55,7 @@ class UpsertRecurringItemRequest(BaseModel):
     type: str
     amount: Decimal = Field(..., description="Negative for expenses, positive for income.")
     enabled: bool = Field(True, description="Whether this recurring item is active.")
+    accountId: UUID
 
     @validator("amount")
     def quantize_amount(cls, v: Decimal) -> Decimal:
@@ -103,6 +105,7 @@ def upsert_recurring_item_api(payload: UpsertRecurringItemRequest):
         type_=payload.type,
         amount=payload.amount,
         enabled=payload.enabled,
+        account_id = payload.accountId
     )
     return {"status": "ok", "id": str(effective_id)}
 
@@ -118,6 +121,7 @@ def upsert_single_item_api(payload: UpsertSingleItemRequest):
         type_= payload.type,
         amount=payload.amount,
         enabled=payload.enabled,
+        account_id = payload.accountId
     )
     return {"status": "ok", "id": str(effective_id)}
 
