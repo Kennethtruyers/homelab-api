@@ -433,7 +433,7 @@ def update_current_values(
     conn.commit()      
 
 
-def fetch_account_movements(account_id: Optional[str] = None) -> List[Dict[str, Any]]:
+def fetch_account_movements(account_id: Optional[str] = None, until: Optional[date] = None) -> List[Dict[str, Any]]:
 
     if account_id is not None:
         view_name = "account_movements_by_account"
@@ -445,9 +445,16 @@ def fetch_account_movements(account_id: Optional[str] = None) -> List[Dict[str, 
     sql = f""" SELECT {fields} FROM {view_name}"""
 
     params = []
+    if account_id is not None or until is not None:
+        sql += " WHERE "
+
     if account_id is not None:
-        sql += " WHERE account_id = %s"
+        sql += " account_id = %s"
         params.append(account_id)
+
+    if until is not None:
+        sql += " date < %s"
+        params.append(until)
 
     sql += " ORDER BY date"
 
