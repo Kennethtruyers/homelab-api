@@ -66,19 +66,19 @@ class UpsertRecurringItemRequest(BaseModel):
 
 
 class EditCurrentValuesRequest(BaseModel):
-    bank_account_amount: Decimal = Field(..., description="Current bank account balance.")
-    cash_amount: Decimal = Field(..., description="Current cash balance.")
-    range_start: date
-    range_end: date
+    bank: Decimal = Field(..., description="Current bank account balance.")
+    cash: Decimal = Field(..., description="Current cash balance.")
+    start: date
+    end: date
 
-    @validator("bank_account_amount", "cash_amount")
+    @validator("bank", "cash")
     def quantize_money(cls, v: Decimal) -> Decimal:
         return v.quantize(Decimal("0.01"))
 
-    @validator("range_end")
+    @validator("end")
     def validate_range(cls, v: date, values) -> date:
-        if "range_start" in values and v < values["range_start"]:
-            raise ValueError("range_end cannot be before range_start")
+        if "start" in values and v < values["start"]:
+            raise ValueError("end cannot be before start")
         return v
 
 
@@ -130,10 +130,10 @@ def delete_single_item_api(item_id: UUID):
 @router.put("/current-values", status_code=status.HTTP_202_ACCEPTED, summary="Edit current values")
 def edit_current_values_api(payload: EditCurrentValuesRequest):
     update_current_values(
-        bank_account_amount=payload.bank_account_amount,
-        cash_amount=payload.cash_amount,
-        range_start=payload.range_start,
-        range_end=payload.range_end,
+        bank_account_amount=payload.bank,
+        cash_amount=payload.cash,
+        range_start=payload.start,
+        range_end=payload.end,
     )
     return {"status": "ok"}
 
