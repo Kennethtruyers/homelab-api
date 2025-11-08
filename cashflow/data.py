@@ -437,7 +437,7 @@ def fetch_account_movements(account_id: Optional[str] = None) -> List[Dict[str, 
 
     if account_id is not None:
         view_name = "account_movements_by_account"
-        fields = "date, category, description, account_id, amount"
+        fields = "date, category, description, account_id, amount, balance"
     else:
         view_name = "account_movements"
         fields = "date, category, description, type, amount, cash, bank"
