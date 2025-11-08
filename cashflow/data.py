@@ -1,5 +1,5 @@
-from connections import get_cashflow_connection
 from __future__ import annotations
+from connections import get_cashflow_connection
 from uuid import UUID
 import os
 from dataclasses import dataclass
