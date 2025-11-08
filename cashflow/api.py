@@ -6,7 +6,7 @@ from datetime import date
 from decimal import Decimal
 from enum import Enum
 from typing import Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, status
 from pydantic import BaseModel, Field, validator
