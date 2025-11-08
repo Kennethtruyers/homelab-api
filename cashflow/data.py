@@ -9,6 +9,8 @@ from typing import Iterable, List, Optional, Tuple
 from psycopg2 import sql
 from psycopg2.extras import RealDictCursor
 import psycopg2
+from typing import Optional, List, Dict, Any
+from datetime import date, datetime
 
 
 def init():
@@ -433,8 +435,10 @@ def update_current_values(
     conn.commit()      
 
 
-def fetch_account_movements(account_id: Optional[str] = None, until: Optional[date] = None) -> List[Dict[str, Any]]:
+def fetch_account_movements(account_id: Optional[str] = None,
+                            until: Optional[date] = None) -> List[Dict[str, Any]]:
 
+    # Pick view + fields
     if account_id is not None:
         view_name = "account_movements_by_account"
         fields = "date, category, description, account_id, amount, balance"
@@ -442,19 +446,29 @@ def fetch_account_movements(account_id: Optional[str] = None, until: Optional[da
         view_name = "account_movements"
         fields = "date, category, description, type, amount, cash, bank"
 
-    sql = f""" SELECT {fields} FROM {view_name}"""
+    sql = f"SELECT {fields} FROM {view_name}"
+    where = []
+    params: list = []
 
-    params = []
-    if account_id is not None or until is not None:
-        sql += " WHERE "
-
+    # Conditions
     if account_id is not None:
-        sql += " account_id = %s"
+        where.append("account_id = %s")
         params.append(account_id)
 
     if until is not None:
-        sql += " date < %s"
+        # Accept either a date or an ISO string; normalize to date
+        if isinstance(until, str):
+            until = date.fromisoformat(until)
+        elif isinstance(until, datetime):
+            until = until.date()
+        elif isinstance(until, type):
+            # Defensive: someone passed a type (e.g., datetime.date) instead of a value
+            raise TypeError("Parameter 'until' must be a date or ISO string, not a type.")
+        where.append("date < %s")
         params.append(until)
+
+    if where:
+        sql += " WHERE " + " AND ".join(where)
 
     sql += " ORDER BY date"
 
