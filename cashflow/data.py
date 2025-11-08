@@ -1,10 +1,12 @@
 from connections import get_cashflow_connection
 from __future__ import annotations
 from uuid import UUID
-from typing import Optional
-from datetime import date
+import os
+from dataclasses import dataclass
+from datetime import date, timedelta
 from decimal import Decimal
-import psycopg
+from typing import Iterable, List, Optional, Tuple
+from psycopg import sql
 
 
 def init():
@@ -108,7 +110,7 @@ def upsert_recurring_item(
                 ),
             )
         conn.commit()
-        
+
     compute_and_replace_account_movements()
 
 
@@ -212,7 +214,7 @@ def replace_account_movements(movements: Iterable[AccountMovement]) -> int:
         "INSERT INTO account_movements "
         '("date", category, description, amount, cash_balance, bank_account_balance) '
         "VALUES (%s, %s, %s, %s, %s, %s)"
-    ))
+    )
 
     rows = [(m.date, m.category, m.description, m.amount, m.cash_balance, m.bank_account_balance)
             for m in movements]
@@ -223,7 +225,7 @@ def replace_account_movements(movements: Iterable[AccountMovement]) -> int:
             inserted = 0
             if rows:
                 cur.executemany(insert_sql, rows)
-                inserted = cur.rowcount  # psycopg3 sets rowcount for executemany
+                inserted = cur.rowcount
         conn.commit()
 
     return inserted
