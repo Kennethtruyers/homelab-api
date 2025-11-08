@@ -2,6 +2,7 @@
 from garmin.data import init as init_garmin
 from workouts.data import init as init_workouts
 from withings.data import init as init_withings
+from cashflow.data import init as init_cashflow
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from workouts.workouts import router as workouts_router
@@ -11,12 +12,14 @@ from nutrition.api import router as nutrition_router
 from tanita.api import router as tanita_router
 from garmin.api import router as garmin_router
 from withings.api import router as withings_router
+from cashflow.api import router as cashflow_router
 
 
 print("Initializing tables")
 init_garmin()
 init_workouts()
 init_withings()
+init_cashflow
 
 print("Starting API")
 app = FastAPI()
@@ -45,6 +48,9 @@ app.include_router(garmin_router, prefix="/garmin", tags=["garmin"])
 
 ''' Withings '''
 app.include_router(withings_router, prefix="/withings", tags=["withings"])
+
+''' CashFlow '''
+app.include_router(cashflow_router, prefix="/cashflow", tags=["cashflow"])
 
 
 

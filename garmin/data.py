@@ -1,7 +1,7 @@
-from connections import get_connection
+from connections import get_fitness_connection
 
 def init():
-    with get_connection() as conn:
+    with get_fitness_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS garmin_activities (
@@ -48,7 +48,7 @@ def init():
                 """)
 
 def insert_activity(id, startTime, activityType,duration, distance, calories, averageHR, maxHR, steps, elevationGain, metadata):
-    with get_connection() as conn:
+    with get_fitness_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT 1 FROM garmin_activities WHERE activity_id = %s", (id,))
             if cur.fetchone():
@@ -66,7 +66,7 @@ def insert_activity(id, startTime, activityType,duration, distance, calories, av
             return True
 
 def insert_exercise(aid, exercise_id, category, name, duration, reps, weight, start_time, end_time, rest_duration, per_kg_kcal):
-    with get_connection() as conn:
+    with get_fitness_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """

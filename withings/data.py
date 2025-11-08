@@ -1,4 +1,4 @@
-from connections import get_connection, get_influx_client
+from connections import get_fitness_connection, get_influx_client
 from datetime import datetime, timedelta, timezone
 from typing import Iterable, Dict, Any, List, DefaultDict, Tuple
 from collections import defaultdict
@@ -9,7 +9,7 @@ import math
 import re
 
 def init():
-    with get_connection() as conn:
+    with get_fitness_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS withings_tokens (
@@ -57,7 +57,7 @@ def upsert_measures_sql(rows: Iterable[Dict[str, Any]], userid : str, startdate:
           "value"    = EXCLUDED."value";
     """
 
-    with get_connection() as conn:
+    with get_fitness_connection() as conn:
         with conn.cursor() as cur:
              cur.execute(delete_sql, (userid, startdate, enddate))
 
@@ -159,7 +159,7 @@ def full_resync_measures_from_postgres() -> None:
     influx.query(delete_q)
 
     # 2) Stream from Postgres
-    with get_connection() as conn:
+    with get_fitness_connection() as conn:
         with conn.cursor(name="withings_stream", cursor_factory=DictCursor) as cur:
             base_sql = """
                 SELECT 
@@ -217,7 +217,7 @@ def full_resync_measures_from_postgres() -> None:
 def upsert_tokens(access_token: str, refresh_token: str, expires_in: int, user_id: str = "default"):
     """Insert or update tokens for a user"""
     expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
-    with get_connection() as conn:
+    with get_fitness_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO withings_tokens (id, access_token, refresh_token, expires_at)
@@ -230,7 +230,7 @@ def upsert_tokens(access_token: str, refresh_token: str, expires_in: int, user_i
 
 def get_tokens(user_id: str = "default"):
     """Fetch tokens for a user"""
-    with get_connection() as conn:
+    with get_fitness_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT access_token, refresh_token, expires_at FROM withings_tokens WHERE id = %s", (user_id,))
             row = cur.fetchone()

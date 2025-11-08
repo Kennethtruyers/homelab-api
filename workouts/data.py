@@ -1,9 +1,9 @@
 
 from datetime import datetime
-from connections import get_connection
+from connections import get_fitness_connection
 
 def init():
-    with get_connection() as conn:
+    with get_fitness_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS workouts (
@@ -40,7 +40,7 @@ def init():
             cur.execute(TAXONOMY_ROLLUP_VIEWS)
 
 def create_workout(notion_id, date, personal_notes, coach_notes, metadata):
-    with get_connection() as conn:
+    with get_fitness_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO workouts (notion_id, date, personal_notes, coach_notes, metadata)
@@ -53,13 +53,13 @@ def create_workout(notion_id, date, personal_notes, coach_notes, metadata):
             """, (notion_id, date, personal_notes, coach_notes, metadata))
 
 def delete_workout(notion_id):
-    with get_connection() as conn:
+    with get_fitness_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM exercises WHERE workout_notion_id = %s", (notion_id,))
             cur.execute("DELETE FROM workouts WHERE notion_id = %s", (notion_id,))
 
 def create_exercise(workout_notion_id, name, variation, sets, reps, weight, rir, notes, metadata):
-    with get_connection() as conn:
+    with get_fitness_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO exercises (workout_notion_id, name, variation, sets, reps, weight, rir, notes, metadata)
@@ -75,14 +75,14 @@ def create_exercise(workout_notion_id, name, variation, sets, reps, weight, rir,
             """, (workout_notion_id, name, variation, sets, reps, weight, rir, notes, metadata))
 
 def delete_exercise(workout_notion_id, name):
-    with get_connection() as conn:
+    with get_fitness_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 DELETE FROM exercises WHERE workout_notion_id = %s AND name = %s
             """, (workout_notion_id, name))
 
 def delete_all_workouts_and_exercises():
-    with get_connection() as conn:
+    with get_fitness_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM exercises")
             cur.execute("DELETE FROM workouts")
