@@ -317,8 +317,7 @@ def fetch_recurring_items() -> List[Dict[str, Any]]:
             type,
             amount,
             enabled
-        FROM recurring_items
-        ORDER BY date;
+        FROM recurring_items;
     """
     with get_cashflow_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
