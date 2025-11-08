@@ -123,11 +123,11 @@ def init():
                 -- opening cash balance + running cash deltas from range_start
                 cv.cash_amount
                     + SUM(CASE WHEN c.type = 'Cash' THEN c.amount ELSE 0 END)
-                        OVER (ORDER BY c.date)     AS "Cash",
+                        OVER (ORDER BY c.date)     AS "cash",
                 -- opening bank balance + running bank deltas from range_start
                 cv.bank_account_amount
                     + SUM(CASE WHEN c.type = 'Bank Account' THEN c.amount ELSE 0 END)
-                        OVER (ORDER BY c.date)     AS "BankAccount"
+                        OVER (ORDER BY c.date)     AS "bank"
                 
                 FROM combined_items c
                 CROSS JOIN cv
@@ -277,8 +277,8 @@ def fetch_account_movements() -> List[Dict[str, Any]]:
             description,
             type,
             amount,
-            "Cash",
-            "BankAccount"
+            cash,
+            bank
         FROM account_movements
         ORDER BY date;
     """
