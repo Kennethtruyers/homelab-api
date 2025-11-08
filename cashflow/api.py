@@ -177,4 +177,4 @@ def upsert_acount_api(payload: EditAccountRequest):
         name=payload.name,
         date=payload.date,
     )
-    return {"status": "ok"}
+    return {"status": "ok", "id": str(effective_id)}
