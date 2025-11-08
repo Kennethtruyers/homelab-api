@@ -19,7 +19,7 @@ print("Initializing tables")
 init_garmin()
 init_workouts()
 init_withings()
-init_cashflow
+init_cashflow()
 
 print("Starting API")
 app = FastAPI()
