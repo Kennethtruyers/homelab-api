@@ -381,8 +381,6 @@ def delete_single_item(id: UUID) -> bool:
             deleted = cur.rowcount > 0
         conn.commit()
 
-    compute_and_replace_account_movements()
-
     return deleted
 
 def fetch_single_items(account_id: Optional[str] = None) -> List[Dict[str, Any]]:
