@@ -170,8 +170,9 @@ def get_accounts():
 
 @router.put("/accounts", status_code=status.HTTP_202_ACCEPTED, summary="Upsert account")
 def upsert_acount_api(payload: EditAccountRequest):
+    effective_id = payload.id or uuid4()
     upsert_account(
-        id=payload.id,
+        id=effective_id,
         amount=payload.amount,
         name=payload.name,
         date=payload.date,
