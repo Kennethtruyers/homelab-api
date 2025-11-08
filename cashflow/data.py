@@ -278,7 +278,7 @@ def fetch_account_movements() -> List[Dict[str, Any]]:
             type,
             amount,
             "Cash",
-            "Bank Account"
+            "BankAccount"
         FROM account_movements
         ORDER BY date;
     """
