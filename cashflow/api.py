@@ -150,5 +150,5 @@ def get_recurring_items():
     return fetch_recurring_items()
 
 @router.get("/current-values")
-def get_recurring_items():
+def get_current_values():
     return fetch_current_values()
