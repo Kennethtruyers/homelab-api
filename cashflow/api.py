@@ -12,7 +12,7 @@ from fastapi import APIRouter, status
 from pydantic import BaseModel, Field, validator
 from cashflow.data import ( upsert_recurring_item, upsert_single_item, delete_recurring_item, delete_single_item, update_current_values, fetch_account_movements )
 
-router = APIRouter(prefix="/api/budget", tags=["budget"])
+router = APIRouter()
 
 
 # ---------- Models ----------
