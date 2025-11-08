@@ -395,13 +395,14 @@ def fetch_single_items(account_id: Optional[str] = None) -> List[Dict[str, Any]]
             enabled,
             account_id as "accountId"
         FROM single_items
-        ORDER BY date
     """
 
     params = []
     if account_id is not None:
         sql += " WHERE account_id = %s"
         params.append(account_id)
+
+    sql += " ORDER BY date"
 
     with get_cashflow_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -441,12 +442,14 @@ def fetch_account_movements(account_id: Optional[str] = None) -> List[Dict[str, 
         view_name = "account_movements"
         fields = "date, category, description, type, amount, cash, bank"
 
-    sql = f""" SELECT {fields} FROM {view_name} ORDER BY date"""
+    sql = f""" SELECT {fields} FROM {view_name}"""
 
     params = []
     if account_id is not None:
         sql += " WHERE account_id = %s"
         params.append(account_id)
+
+    sql += " ORDER BY date"
 
     with get_cashflow_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
