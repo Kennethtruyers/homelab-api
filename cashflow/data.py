@@ -323,3 +323,17 @@ def fetch_recurring_items() -> List[Dict[str, Any]]:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(sql)
             return cur.fetchall()
+
+def fetch_current_values() -> List[Dict[str, Any]]:
+    sql = """
+        SELECT
+            bank_account_amount as "bank",
+            cash_amount as "cash",
+            range_start as "start",
+            range_end as "end"
+        FROM current_values;
+    """
+    with get_cashflow_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(sql)
+            return cur.fetchall()
