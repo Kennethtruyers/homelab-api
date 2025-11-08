@@ -358,7 +358,7 @@ def upsert_single_item(
                 INSERT INTO single_items (
                     id, "date", category, description, "type", amount, enabled, account_id
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (id) DO UPDATE SET
                     "date" = EXCLUDED."date",
                     category = EXCLUDED.category,
