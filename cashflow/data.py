@@ -282,7 +282,6 @@ def fetch_account_movements() -> List[Dict[str, Any]]:
         ORDER BY date;
     """
     with get_cashflow_connection() as conn:
-        with conn.cursor(row_factory=psycopg2.rows.dict_row) as cur:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(sql)
-            rows = cur.fetchall()
-            return [dict(r) for r in rows]
+            return cur.fetchall()
