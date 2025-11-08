@@ -456,14 +456,6 @@ def fetch_account_movements(account_id: Optional[str] = None,
         params.append(account_id)
 
     if until is not None:
-        # Accept either a date or an ISO string; normalize to date
-        if isinstance(until, str):
-            until = date.fromisoformat(until)
-        elif isinstance(until, datetime):
-            until = until.date()
-        elif isinstance(until, type):
-            # Defensive: someone passed a type (e.g., datetime.date) instead of a value
-            raise TypeError("Parameter 'until' must be a date or ISO string, not a type.")
         where.append("date < %s")
         params.append(until)
 
