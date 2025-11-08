@@ -84,12 +84,12 @@ def upsert_recurring_item_api(payload: UpsertRecurringItemRequest):
     upsert_recurring_item(
         id=effective_id,
         every=payload.every,
-        unit=str(payload.unit),
+        unit=payload.unit.value,
         category=payload.category,
         description=payload.description,
         date_from=payload.dateFrom,
         date_to=payload.dateTo,
-        type_=str(payload.type),
+        type_=payload.type,
         amount=payload.amount,
         enabled=payload.enabled,
     )
@@ -104,7 +104,7 @@ def upsert_single_item_api(payload: UpsertSingleItemRequest):
         date_=payload.date,
         category=payload.category,
         description=payload.description,
-        type_=str(payload.type),
+        type_= payload.type,
         amount=payload.amount,
         enabled=payload.enabled,
     )
