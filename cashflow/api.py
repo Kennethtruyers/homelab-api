@@ -17,11 +17,6 @@ router = APIRouter()
 
 # ---------- Models ----------
 
-class MoneyAccountType(str, Enum):
-    bank_account = "bank_account"
-    cash = "cash"
-
-
 class IntervalUnit(str, Enum):
     days = "days"
     weeks = "weeks"
@@ -34,7 +29,7 @@ class UpsertSingleItemRequest(BaseModel):
     date: date
     category: str
     description: str
-    type: MoneyAccountType
+    type: str
     amount: Decimal = Field(..., description="Negative for expenses, positive for income.")
     enabled: bool = Field(True, description="Whether this item is active.")
 
@@ -51,7 +46,7 @@ class UpsertRecurringItemRequest(BaseModel):
     description: str
     date_from: date
     date_to: Optional[date] = None
-    type: MoneyAccountType
+    type: str
     amount: Decimal = Field(..., description="Negative for expenses, positive for income.")
     enabled: bool = Field(True, description="Whether this recurring item is active.")
 
