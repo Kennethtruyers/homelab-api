@@ -6,10 +6,10 @@ POSTGRES_CON = os.getenv("POSTGRES_CON")
  
 
 def get_fitness_connection():
-    return psycopg2.connect(POSTGRES_CON) + "fitness"
+    return psycopg2.connect(POSTGRES_CON + "fitness")
 
 def get_cashflow_connection():
-    return psycopg2.connect(POSTGRES_CON) + "cashflow"
+    return psycopg2.connect(POSTGRES_CON + "cashflow") 
 
 
 INFLUX_HOST = os.getenv("INFLUX_HOST")
