@@ -12,7 +12,7 @@ from fastapi import APIRouter, status
 from pydantic import BaseModel, Field, validator
 from cashflow.data import ( 
     upsert_recurring_item, fetch_recurring_items, delete_recurring_item, 
-    upsert_single_item, , fetch_single_items, delete_single_item, 
+    upsert_single_item, fetch_single_items, delete_single_item, 
     update_current_values, fetch_current_values, 
     fetch_account_movements )
 
