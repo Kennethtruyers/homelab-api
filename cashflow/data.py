@@ -293,7 +293,7 @@ def upsert_recurring_item(
                     type_,
                     amount,
                     enabled,
-                    account_id
+                    str(account_id)
                 ),
             )
         conn.commit()
@@ -368,7 +368,7 @@ def upsert_single_item(
                     enabled = EXCLUDED.enabled,
                     account_id = EXCLUDED.account_id
                 """,
-                (str(id), date_, category, description, type_, amount, enabled, account_id),
+                (str(id), date_, category, description, type_, amount, enabled, str(account_id)),
             )
         conn.commit()
 
