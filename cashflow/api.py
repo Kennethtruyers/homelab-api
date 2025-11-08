@@ -10,7 +10,7 @@ from uuid import UUID, uuid4
 
 from fastapi import APIRouter, status
 from pydantic import BaseModel, Field, validator
-from cashflow.data import ( upsert_recurring_item, upsert_single_item, delete_recurring_item, delete_single_item, update_current_values, fetch_account_movements )
+from cashflow.data import ( upsert_recurring_item, upsert_single_item, delete_recurring_item, delete_single_item, update_current_values, fetch_account_movements, fetch_single_items, fetch_recurring_items )
 
 router = APIRouter()
 
@@ -136,3 +136,11 @@ def edit_current_values_api(payload: EditCurrentValuesRequest):
 @router.get("/account-movements")
 def get_account_movements():
     return fetch_account_movements()
+
+@router.get("/single")
+def get_single_items():
+    return fetch_single_items()
+
+@router.get("/recurring")
+def get_recurring_items():
+    return fetch_recurring_items()

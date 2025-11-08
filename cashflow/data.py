@@ -144,8 +144,8 @@ def upsert_recurring_item(
     unit: str,
     category: str,
     description: str,
-    date_from: date,
-    date_to: Optional[date],
+    dateFrom: date,
+    dateTo: Optional[date],
     type_: str,
     amount: Decimal,
     enabled: bool,
@@ -177,8 +177,8 @@ def upsert_recurring_item(
                     unit,
                     category,
                     description,
-                    date_from,
-                    date_to,
+                    dateFrom,
+                    dateTo,
                     type_,
                     amount,
                     enabled,
@@ -279,6 +279,45 @@ def fetch_account_movements() -> List[Dict[str, Any]]:
             cash,
             bank
         FROM account_movements
+        ORDER BY date;
+    """
+    with get_cashflow_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(sql)
+            return cur.fetchall()
+
+def fetch_single_items() -> List[Dict[str, Any]]:
+    sql = """
+        SELECT
+            id,
+            date,
+            category,
+            description,
+            type,
+            amount,
+            enabled
+        FROM single_items
+        ORDER BY date;
+    """
+    with get_cashflow_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(sql)
+            return cur.fetchall()
+
+def fetch_recurring_items() -> List[Dict[str, Any]]:
+    sql = """
+        SELECT
+            id,
+            every,
+            unit,
+            category,
+            description,
+            date_from as "dateFrom",
+            date_to as "dateTo",
+            type,
+            amount,
+            enabled
+        FROM recurring_items
         ORDER BY date;
     """
     with get_cashflow_connection() as conn:
