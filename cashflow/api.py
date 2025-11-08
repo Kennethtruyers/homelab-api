@@ -11,6 +11,7 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, status
 from pydantic import BaseModel, Field, validator
 from cashflow.data import ( 
+    fetch_accounts, upsert_account,
     upsert_recurring_item, fetch_recurring_items, delete_recurring_item, 
     upsert_single_item, fetch_single_items, delete_single_item, 
     update_current_values, fetch_current_values, 
@@ -81,6 +82,12 @@ class EditCurrentValuesRequest(BaseModel):
             raise ValueError("end cannot be before start")
         return v
 
+class EditAccountRequest(BaseModel):
+    id: Optional[UUID] = Field(None, description="Present to update, absent to create.")
+    amount: Decimal = Field(..., description="Current cash balance.")
+    name: str
+    date: date
+
 
 @router.post("/recurring", status_code=status.HTTP_202_ACCEPTED, summary="Upsert recurring item")
 def upsert_recurring_item_api(payload: UpsertRecurringItemRequest):
@@ -138,17 +145,31 @@ def edit_current_values_api(payload: EditCurrentValuesRequest):
     return {"status": "ok"}
 
 @router.get("/account-movements")
-def get_account_movements():
-    return fetch_account_movements()
+def get_account_movements(accountId: Optional[str] = Query(None)):
+    return fetch_account_movements(accountId)
 
 @router.get("/single")
-def get_single_items():
-    return fetch_single_items()
+def get_single_items(accountId: Optional[str] = Query(None)):
+    return fetch_single_items(accountId)
 
 @router.get("/recurring")
-def get_recurring_items():
-    return fetch_recurring_items()
+def get_recurring_items(accountId: Optional[str] = Query(None)):
+    return fetch_recurring_items(accountId)
 
 @router.get("/current-values")
 def get_current_values():
     return fetch_current_values()
+
+@router.get("/accounts")
+def get_accounts():
+    return fetch_accounts()
+
+@router.put("/accounts", status_code=status.HTTP_202_ACCEPTED, summary="Upsert account")
+def upsert_acount_api(payload: EditAccountRequest):
+    upsert_account(
+        id=payload.id,
+        amount=payload.amount,
+        name=payload.name,
+        date=payload.date,
+    )
+    return {"status": "ok"}
