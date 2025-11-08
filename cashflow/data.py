@@ -7,6 +7,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Iterable, List, Optional, Tuple
 from psycopg2 import sql
+import psycopg2
 
 
 def init():
