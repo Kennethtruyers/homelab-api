@@ -44,8 +44,8 @@ class UpsertRecurringItemRequest(BaseModel):
     unit: IntervalUnit = Field(..., description="Unit for the 'every' field.")
     category: str
     description: str
-    date_from: date
-    date_to: Optional[date] = None
+    dateFrom: date
+    dateTo: Optional[date] = None
     type: str
     amount: Decimal = Field(..., description="Negative for expenses, positive for income.")
     enabled: bool = Field(True, description="Whether this recurring item is active.")
@@ -87,8 +87,8 @@ def upsert_recurring_item_api(payload: UpsertRecurringItemRequest):
         unit=str(payload.unit),
         category=payload.category,
         description=payload.description,
-        date_from=payload.date_from,
-        date_to=payload.date_to,
+        date_from=payload.dateFrom,
+        date_to=payload.dateTo,
         type_=str(payload.type),
         amount=payload.amount,
         enabled=payload.enabled,
