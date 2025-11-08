@@ -136,7 +136,6 @@ def init():
             """)
 
 
-  # budget_repository.py
 
 # ---------- RECURRING ITEMS ----------
 def upsert_recurring_item(
@@ -156,7 +155,7 @@ def upsert_recurring_item(
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO budget.recurring_items (
+                INSERT INTO recurring_items (
                     id, every, unit, category, description,
                     date_from, date_to, "type", amount, enabled
                 )
@@ -192,7 +191,7 @@ def delete_recurring_item(id: UUID) -> bool:
     """Delete recurring item by ID. Returns True if something was deleted."""
     with get_cashflow_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute("DELETE FROM budget.recurring_items WHERE id = %s", (str(id),))
+            cur.execute("DELETE FROM recurring_items WHERE id = %s", (str(id),))
             deleted = cur.rowcount > 0
         conn.commit()
 
@@ -215,7 +214,7 @@ def upsert_single_item(
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO budget.single_items (
+                INSERT INTO single_items (
                     id, "date", category, description, "type", amount, enabled
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -236,7 +235,7 @@ def delete_single_item(id: UUID) -> bool:
     """Delete single item by ID. Returns True if something was deleted."""
     with get_cashflow_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute("DELETE FROM budget.single_items WHERE id = %s", (str(id),))
+            cur.execute("DELETE FROM single_items WHERE id = %s", (str(id),))
             deleted = cur.rowcount > 0
         conn.commit()
 
@@ -258,8 +257,8 @@ def update_current_values(
         with conn.cursor() as cur:
             cur.execute(
                 """
-                DELETE FROM budget.current_values;
-                INSERT INTO budget.current_values (
+                DELETE FROM current_values;
+                INSERT INTO current_values (
                     bank_account_amount, cash_amount, range_start, range_end
                 )
                 VALUES (%s, %s, %s, %s);
