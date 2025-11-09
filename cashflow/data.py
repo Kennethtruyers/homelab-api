@@ -76,7 +76,7 @@ def init():
                         r.amount,
                         r.account_id,
                         /* stop at date_to, or 5 years from today if date_to is NULL */
-                        COALESCE(r.date_to, (CURRENT_DATE + INTERVAL '30 years')::date) AS stop_date,
+                        COALESCE(r.date_to, a.enddate) AS stop_date,
                         /* build the interval step based on unit + every */
                         CASE r.unit
                         WHEN 'day'   THEN make_interval(days   => r.every)
@@ -86,6 +86,8 @@ def init():
                         ELSE NULL
                         END AS step
                     FROM recurring_items r
+					INNER JOIN accounts a
+					ON a.id = r.account_id
                     WHERE r.enabled = TRUE
                     ),
                     expanded AS (
@@ -96,8 +98,7 @@ def init():
                         b.kind,
                         b.amount,
                         b.account_id,
-                        (gs)::date AS date,
-                        ROW_NUMBER() OVER (PARTITION BY b.recurring_id ORDER BY (gs)::date) - 1 AS occurrence_index
+                        (gs)::date AS date
                     FROM bounds b
                     CROSS JOIN LATERAL generate_series(
                         b.date_from::timestamp,
@@ -114,107 +115,110 @@ def init():
                     description,
                     kind,
                     amount,
-                    account_id,
-                    occurrence_index
+                    account_id
                     FROM expanded
                     ORDER BY date;
             """)
 
             cur.execute("""CREATE OR REPLACE VIEW combined_items AS
-                    SELECT date, category, description, amount, account_id, kind FROM recurring_items_projection
-                        UNION
-                    SELECT date, category, description, amount, account_id, kind FROM single_items WHERE enabled = TRUE
+                SELECT date, category, description, amount, account_id, kind FROM recurring_items_projection
+                    UNION
+                SELECT date, category, description, amount, account_id, kind FROM single_items WHERE enabled = TRUE;
             """)
 
             cur.execute("""CREATE OR REPLACE VIEW account_movements_by_account AS
-                            WITH RECURSIVE
-                            anchors AS (
-                            SELECT
-                                a.id   AS account_id,
-                                a.name AS account_name,
-                                a.date AS anchor_date,
-                                a.amount::numeric AS opening_balance
-                            FROM accounts a
-                            ),
-                            movements AS (
-                            SELECT
-                                ci.date,
-                                ci.category,
-                                ci.description,
-                                ci.account_id,
-                                ci.amount::numeric,
-                                ci.kind::text,          -- 'absolute' | 'percent'
-                                1 AS ord
-                            FROM combined_items ci
-                            JOIN anchors an
-                                ON an.account_id = ci.account_id
-                            AND ci.account_id IS NOT NULL
-                            AND ci.date >= an.anchor_date
-                            ),
-                            opening AS (
-                            -- synthetic opening row per account at its anchor date
-                            SELECT
-                                an.anchor_date AS date,
-                                'Opening Balance'::text AS category,
-                                an.account_name AS description,
-                                an.account_id,
-                                0::numeric AS amount,   -- no delta
-                                'absolute'::text AS kind,
-                                0 AS ord
-                            FROM anchors an
-                            ),
-                            unioned AS (
-                            SELECT date, category, description, account_id, amount, kind, ord FROM movements
-                            UNION ALL
-                            SELECT date, category, description, account_id, amount, kind, ord FROM opening
-                            ),
-                            sequenced AS (
-                            SELECT
-                                u.*,
-                                ROW_NUMBER() OVER (
-                                PARTITION BY u.account_id
-                                ORDER BY u.date, u.ord, u.category, u.description
-                                ) AS rn
-                            FROM unioned u
-                            ),
-                            rec AS (
-                            -- seed: first row per account with the opening balance
-                            SELECT
-                                s.account_id, s.rn, s.date, s.category, s.description, s.kind, s.amount,
-                                an.opening_balance AS balance
-                            FROM sequenced s
-                            JOIN anchors an ON an.account_id = s.account_id
-                            WHERE s.rn = 1
+                    WITH RECURSIVE
+                    anchors AS (
+                    SELECT
+                        a.id   AS account_id,
+                        a.name AS account_name,
+                        a.date AS anchor_date,
+                        a.amount::numeric AS opening_balance
+                    FROM accounts a
+                    ),
+                    movements AS (
+                    SELECT
+                        ci.date,
+                        ci.category,
+                        ci.description,
+                        ci.account_id,
+                        ci.amount::numeric,
+                        ci.kind::text,          -- 'absolute' | 'percent'
+                        1 AS ord
+                    FROM combined_items ci
+                    JOIN anchors an
+                        ON an.account_id = ci.account_id
+                    AND ci.account_id IS NOT NULL
+                    AND ci.date >= an.anchor_date
+                    ),
+                    opening AS (
+                    -- synthetic opening row per account at its anchor date
+                    SELECT
+                        an.anchor_date AS date,
+                        'Opening Balance'::text AS category,
+                        an.account_name AS description,
+                        an.account_id,
+                        0::numeric AS amount,   -- no delta
+                        'absolute'::text AS kind,
+                        0 AS ord
+                    FROM anchors an
+                    ),
+                    unioned AS (
+                    SELECT date, category, description, account_id, amount, kind, ord FROM movements
+                    UNION ALL
+                    SELECT date, category, description, account_id, amount, kind, ord FROM opening
+                    ),
+                    sequenced AS (
+                    SELECT
+                        u.*,
+                        ROW_NUMBER() OVER (
+                        PARTITION BY u.account_id
+                        ORDER BY u.date, u.ord, u.category, u.description
+                        ) AS rn
+                    FROM unioned u
+                    ),
+                    rec AS (
+                    -- seed: first row per account with the opening balance
+                    SELECT
+                        s.account_id, s.rn, s.date, s.category, s.description, s.kind, an.opening_balance as amount,
+                        an.opening_balance AS balance
+                    FROM sequenced s
+                    JOIN anchors an ON an.account_id = s.account_id
+                    WHERE s.rn = 1
 
-                            UNION ALL
+                    UNION ALL
 
-                            -- step: apply subsequent rows in order
-                            SELECT
-                                s.account_id, s.rn, s.date, s.category, s.description, s.kind, s.amount,
-                                CASE
-                                WHEN s.kind = 'percent'
-                                    THEN r.balance *  (1 + s.amount/100)   -- use (1 + s.amount/100.0) if you store 5 for 5%
-                                ELSE r.balance + s.amount
-                                END AS balance
-                            FROM rec r
-                            JOIN sequenced s
-                                ON s.account_id = r.account_id
-                            AND s.rn         = r.rn + 1
-                            )
-                            SELECT
-                            r.date,
-                            r.category,
-                            r.description,
-                            r.account_id,
-							CASE
-                                WHEN r.kind = 'percent'
-                                    THEN r.balance - (r.balance /  (1 + r.amount/100))
-                                ELSE r.amount
-							END AS amount,
-                            r.kind,
-                            r.balance
-                            FROM rec r
-                            ORDER BY r.date, r.account_id, r.category, r.description;
+                    -- step: apply subsequent rows in order
+                    SELECT
+                        s.account_id, s.rn, s.date, s.category, s.description, s.kind, s.amount,
+                        CASE
+                        WHEN s.kind = 'percent'
+                            THEN r.balance *  (1 + s.amount/100)   -- use (1 + s.amount/100.0) if you store 5 for 5%
+                        ELSE r.balance + s.amount
+                        END AS balance
+                    FROM rec r
+                    JOIN sequenced s
+                        ON s.account_id = r.account_id
+                    AND s.rn         = r.rn + 1
+                    )
+                    SELECT
+                    r.date,
+                    r.category,
+                    r.description,
+                    r.account_id,
+                    CASE
+                        WHEN r.kind = 'percent'
+                            THEN r.balance - (r.balance /  (1 + r.amount/100))
+                        ELSE r.amount
+                    END AS amount,
+                    r.kind,
+                    r.balance,
+                    a.type,
+                    a.liquid
+                    FROM rec r
+                    INNER JOIN accounts a
+                    ON a.id = r.account_id
+                    ORDER BY r.date, r.account_id, r.category, r.description;
             """)
 
 # ---------- ACCOUNTS -----------------
