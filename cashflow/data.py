@@ -21,7 +21,9 @@ def init():
                     name TEXT NOT NULL, 
                     date DATE NOT NULL,
                     endDate DATE NOT NULL,
-                    amount NUMERIC(14,2) NOT NULL	
+                    amount NUMERIC(14,2) NOT NULL,
+                    type string,
+                    liquid bool	
                 );
             """)
 
@@ -74,7 +76,7 @@ def init():
                         r.amount,
                         r.account_id,
                         /* stop at date_to, or 5 years from today if date_to is NULL */
-                        COALESCE(r.date_to, (CURRENT_DATE + INTERVAL '5 years')::date) AS stop_date,
+                        COALESCE(r.date_to, (CURRENT_DATE + INTERVAL '30 years')::date) AS stop_date,
                         /* build the interval step based on unit + every */
                         CASE r.unit
                         WHEN 'day'   THEN make_interval(days   => r.every)
@@ -221,34 +223,40 @@ def upsert_account(
     name: str,
     date: date,
     endDate: date,
-    amount: Decimal):
+    amount: Decimal,
+    type: str,
+    liquid : bool):
     """Insert or update an account by ID."""
     with get_cashflow_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
                 INSERT INTO accounts (
-                    id, name, date, enddate, amount
+                    id, name, date, enddate, amount, type, liquid
                 )
-                VALUES (%s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (id) DO UPDATE SET
                     name = EXCLUDED.name,
                     date = EXCLUDED.date,
                     enddate = EXCLUDED.endDate,
-                    amount = EXCLUDED.amount
+                    amount = EXCLUDED.amount,
+                    type = EXCLUDED.type,
+                    liquid = EXCLUDED.liquid
                 """,
                 (
                     str(id),
                     name,
                     date,
                     endDate,
-                    amount
+                    amount,
+                    type,
+                    liquid
                 ),
             )
         conn.commit()
 
 def fetch_accounts() -> List[Dict[str, Any]]:
-    sql = """SELECT id, name, date, enddate, amount FROM accounts;"""
+    sql = """SELECT id, name, date, enddate, amount, type, liquid FROM accounts;"""
     with get_cashflow_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(sql)
