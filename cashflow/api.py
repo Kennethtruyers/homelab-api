@@ -60,7 +60,9 @@ class EditAccountRequest(BaseModel):
     amount: Decimal = Field(..., description="Current cash balance.")
     name: str
     date: date
-    enddate: date
+    enddate: date,
+    type: str,
+    liquid: bool
 
 @router.post("/recurring", status_code=status.HTTP_202_ACCEPTED, summary="Upsert recurring item")
 def upsert_recurring_item_api(payload: UpsertRecurringItemRequest):
@@ -129,6 +131,8 @@ def upsert_acount_api(payload: EditAccountRequest):
         amount=payload.amount,
         name=payload.name,
         date=payload.date,
-        endDate=payload.enddate
+        endDate=payload.enddate,
+        type=payload.type,
+        liquid=payload.liquid
     )
     return {"status": "ok", "id": str(effective_id)}
