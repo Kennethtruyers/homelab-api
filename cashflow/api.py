@@ -149,7 +149,7 @@ def edit_current_values_api(payload: EditCurrentValuesRequest):
     return {"status": "ok"}
 
 @router.get("/account-movements")
-def get_account_movements(accountId: str = Query(), until: Optional[date] = Query(None)):
+def get_account_movements(accountId: str = Query(...), until: Optional[date] = Query(None)):
     return fetch_account_movements(accountId, until)
 
 @router.get("/single")
