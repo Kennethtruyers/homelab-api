@@ -59,7 +59,7 @@ class EditAccountRequest(BaseModel):
     id: Optional[UUID] = Field(None, description="Present to update, absent to create.")
     amount: Decimal = Field(..., description="Current cash balance.")
     name: str
-    date: date,
+    date: date
     endDate: date
 
 @router.post("/recurring", status_code=status.HTTP_202_ACCEPTED, summary="Upsert recurring item")
