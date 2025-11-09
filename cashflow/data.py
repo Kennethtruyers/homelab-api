@@ -448,7 +448,7 @@ def fetch_account_movements(account_id: str, until: Optional[date] = None) -> Li
 
     sql = "SELECT date, category, description, account_id, amount, balance FROM account_movements_by_account"
     where = ["account_id = %s"]
-    params: list = [until]
+    params: list = [account_id]
 
     if until is not None:
         where.append("date < %s")
