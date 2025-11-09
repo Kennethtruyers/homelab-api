@@ -39,10 +39,6 @@ class UpsertSingleItemRequest(BaseModel):
     enabled: bool = Field(True, description="Whether this item is active.")
     accountId: UUID
 
-    @validator("amount")
-    def quantize_amount(cls, v: Decimal) -> Decimal:
-        return v.quantize(Decimal("0.01"))
-
 
 class UpsertRecurringItemRequest(BaseModel):
     id: Optional[UUID] = Field(None, description="Present to update, absent to create.")
@@ -56,10 +52,6 @@ class UpsertRecurringItemRequest(BaseModel):
     amount: Decimal = Field(..., description="Negative for expenses, positive for income.")
     enabled: bool = Field(True, description="Whether this recurring item is active.")
     accountId: UUID
-
-    @validator("amount")
-    def quantize_amount(cls, v: Decimal) -> Decimal:
-        return v.quantize(Decimal("0.01"))
 
     @validator("dateTo")
     def validate_date_range(cls, v: Optional[date], values) -> Optional[date]:
