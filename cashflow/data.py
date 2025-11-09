@@ -228,13 +228,13 @@ def upsert_account(
             cur.execute(
                 """
                 INSERT INTO accounts (
-                    id, name, date, endDate, amount
+                    id, name, date, enddate, amount
                 )
                 VALUES (%s, %s, %s, %s, %s)
                 ON CONFLICT (id) DO UPDATE SET
                     name = EXCLUDED.name,
                     date = EXCLUDED.date,
-                    endDate = EXCLUDED.endDate,
+                    enddate = EXCLUDED.endDate,
                     amount = EXCLUDED.amount
                 """,
                 (
@@ -248,7 +248,7 @@ def upsert_account(
         conn.commit()
 
 def fetch_accounts() -> List[Dict[str, Any]]:
-    sql = """SELECT id, name, date, endDate, amount FROM accounts;"""
+    sql = """SELECT id, name, date, enddate, amount FROM accounts;"""
     with get_cashflow_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(sql)
