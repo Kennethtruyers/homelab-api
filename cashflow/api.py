@@ -34,7 +34,7 @@ class UpsertSingleItemRequest(BaseModel):
     date: date
     category: str
     description: str
-    type: str
+    kind: str
     amount: Decimal = Field(..., description="Negative for expenses, positive for income.")
     enabled: bool = Field(True, description="Whether this item is active.")
     accountId: UUID
@@ -52,7 +52,7 @@ class UpsertRecurringItemRequest(BaseModel):
     description: str
     dateFrom: date
     dateTo: Optional[date] = None
-    type: str
+    kind: str
     amount: Decimal = Field(..., description="Negative for expenses, positive for income.")
     enabled: bool = Field(True, description="Whether this recurring item is active.")
     accountId: UUID
@@ -102,7 +102,7 @@ def upsert_recurring_item_api(payload: UpsertRecurringItemRequest):
         description=payload.description,
         dateFrom=payload.dateFrom,
         dateTo=payload.dateTo,
-        type_=payload.type,
+        kind=payload.kind,
         amount=payload.amount,
         enabled=payload.enabled,
         account_id = payload.accountId
@@ -118,7 +118,7 @@ def upsert_single_item_api(payload: UpsertSingleItemRequest):
         date_=payload.date,
         category=payload.category,
         description=payload.description,
-        type_= payload.type,
+        kind= payload.kind,
         amount=payload.amount,
         enabled=payload.enabled,
         account_id = payload.accountId
@@ -149,7 +149,7 @@ def edit_current_values_api(payload: EditCurrentValuesRequest):
     return {"status": "ok"}
 
 @router.get("/account-movements")
-def get_account_movements(accountId: Optional[str] = Query(None), until: Optional[date] = Query(None)):
+def get_account_movements(accountId: str = Query, until: Optional[date] = Query(None)):
     return fetch_account_movements(accountId, until)
 
 @router.get("/single")

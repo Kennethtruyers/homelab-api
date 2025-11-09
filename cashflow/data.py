@@ -29,7 +29,7 @@ def init():
                     "date" DATE NOT NULL,
                     category TEXT NOT NULL,
                     description TEXT NOT NULL,
-                    "type" TEXT NOT NULL,
+                    kind TEXT NOT NULL CHECK (type IN ('absolute','percent')),
                     amount NUMERIC(14,2) NOT NULL,
                     enabled BOOLEAN NOT NULL,
 					account_id UUID NULL,
@@ -48,7 +48,7 @@ def init():
                     description TEXT NOT NULL,
                     date_from DATE NOT NULL,
                     date_to DATE NULL,
-                    type TEXT NOT NULL CHECK (type IN ('Bank Account','Cash')),
+                    kind TEXT NOT NULL CHECK (type IN ('absolute','percent')),
                     amount NUMERIC(14,2) NOT NULL,
                     enabled BOOLEAN NOT NULL DEFAULT TRUE,
                     account_id UUID NULL,
@@ -69,7 +69,7 @@ def init():
                         r.description,
                         r.date_from,
                         r.date_to,
-                        r.type,
+                        r.kind,
                         r.amount,
                         r.account_id,
                         /* stop at date_to, or 5 years from today if date_to is NULL */
@@ -90,7 +90,7 @@ def init():
                         b.recurring_id,
                         b.category,
                         b.description,
-                        b.type,
+                        b.kind,
                         b.amount,
                         b.account_id,
                         (gs)::date AS date,
@@ -109,7 +109,7 @@ def init():
                     date,
                     category,
                     description,
-                    type,
+                    kind,
                     amount,
                     account_id,
                     occurrence_index
@@ -126,85 +126,96 @@ def init():
             """)
 
             cur.execute("""CREATE OR REPLACE VIEW combined_items AS
-                    SELECT date, category, description, type, amount, account_id FROM recurring_items_projection
+                    SELECT date, category, description, type, amount, account_id, kind FROM recurring_items_projection
                         UNION
-                    SELECT date, category, description, type, amount, account_id FROM single_items WHERE enabled = TRUE
-            """)
-
-            cur.execute("""CREATE OR REPLACE VIEW account_movements AS
-                    WITH cv AS (
-                    SELECT *
-                    FROM current_values
-                    LIMIT 1
-                    )
-                    SELECT
-                    c.date,
-                    c.category,
-                    c.description,
-                    c.type,
-                    c.amount,
-                    -- opening cash balance + running cash deltas from range_start
-                    cv.cash_amount
-                        + SUM(CASE WHEN c.type = 'Cash' THEN c.amount ELSE 0 END)
-                            OVER (ORDER BY c.date)     AS "cash",
-                    -- opening bank balance + running bank deltas from range_start
-                    cv.bank_account_amount
-                        + SUM(CASE WHEN c.type = 'Bank Account' THEN c.amount ELSE 0 END)
-                            OVER (ORDER BY c.date)     AS "bank"
-                    
-                    FROM combined_items c
-                    CROSS JOIN cv
-                    WHERE c.date BETWEEN cv.range_start AND cv.range_end
-                    ORDER BY c.date;
+                    SELECT date, category, description, type, amount, account_id, kind FROM single_items WHERE enabled = TRUE
             """)
 
             cur.execute("""CREATE OR REPLACE VIEW account_movements_by_account AS
-                    WITH movements AS (
-                    SELECT
-                        ci.date,
-                        ci.category,
-                        ci.description,
-                        ci.account_id,
-                        ci.amount
-                    FROM combined_items ci
-                    JOIN accounts a
-                        ON a.id = ci.account_id
-                    AND ci.account_id IS NOT NULL
-                    AND ci.date >= a.date             -- only movements on/after the account’s anchor date
-                    ),
-                    opening AS (
-                    -- one synthetic opening row per account at its anchor date
-                    SELECT
-                        a.date       AS date,
-                        'Opening Balance'::text AS category,
-                        a.name       AS description,
-                        a.id         AS account_id,
-                        0::numeric   AS amount,          -- delta 0; opening goes in a separate column
-                        a.amount     AS opening_amount
-                    FROM accounts a
-                    ),
-                    unioned AS (
-                    SELECT m.date, m.category, m.description, m.account_id, m.amount, NULL::numeric AS opening_amount
-                    FROM movements m
-                    UNION ALL
-                    SELECT o.date, o.category, o.description, o.account_id, o.amount, o.opening_amount
-                    FROM opening o
-                    )
-                    SELECT
-                    u.date,
-                    u.category,
-                    u.description,
-                    u.account_id,
-                    u.amount,
-                    /* running balance per account = opening + cumulative deltas */
-                    COALESCE(MAX(u.opening_amount) OVER (PARTITION BY u.account_id), 0)
-                        + SUM(u.amount) OVER (
-                            PARTITION BY u.account_id
-                            ORDER BY u.date, u.category, u.description
-                            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-                        ) AS balance
-                    FROM unioned u
-                    ORDER BY u.date, u.account_id, u.category, u.description;
+                            WITH RECURSIVE
+                            anchors AS (
+                            SELECT
+                                a.id   AS account_id,
+                                a.name AS account_name,
+                                a.date AS anchor_date,
+                                a.amount::numeric AS opening_balance
+                            FROM accounts a
+                            ),
+                            movements AS (
+                            SELECT
+                                ci.date,
+                                ci.category,
+                                ci.description,
+                                ci.account_id,
+                                ci.amount::numeric,
+                                ci.kind::text,          -- 'absolute' | 'percent'
+                                1 AS ord
+                            FROM combined_items ci
+                            JOIN anchors an
+                                ON an.account_id = ci.account_id
+                            AND ci.account_id IS NOT NULL
+                            AND ci.date >= an.anchor_date
+                            ),
+                            opening AS (
+                            -- synthetic opening row per account at its anchor date
+                            SELECT
+                                an.anchor_date AS date,
+                                'Opening Balance'::text AS category,
+                                an.account_name AS description,
+                                an.account_id,
+                                0::numeric AS amount,   -- no delta
+                                'absolute'::text AS kind,
+                                0 AS ord
+                            FROM anchors an
+                            ),
+                            unioned AS (
+                            SELECT date, category, description, account_id, amount, kind, ord FROM movements
+                            UNION ALL
+                            SELECT date, category, description, account_id, amount, kind, ord FROM opening
+                            ),
+                            sequenced AS (
+                            SELECT
+                                u.*,
+                                ROW_NUMBER() OVER (
+                                PARTITION BY u.account_id
+                                ORDER BY u.date, u.ord, u.category, u.description
+                                ) AS rn
+                            FROM unioned u
+                            ),
+                            rec AS (
+                            -- seed: first row per account with the opening balance
+                            SELECT
+                                s.account_id, s.rn, s.date, s.category, s.description, s.kind, s.amount,
+                                an.opening_balance AS balance
+                            FROM sequenced s
+                            JOIN anchors an ON an.account_id = s.account_id
+                            WHERE s.rn = 1
+
+                            UNION ALL
+
+                            -- step: apply subsequent rows in order
+                            SELECT
+                                s.account_id, s.rn, s.date, s.category, s.description, s.kind, s.amount,
+                                CASE
+                                WHEN s.kind = 'percent'
+                                    THEN r.balance * (1 + s.amount)   -- use (1 + s.amount/100.0) if you store 5 for 5%
+                                ELSE r.balance + s.amount
+                                END AS balance
+                            FROM rec r
+                            JOIN sequenced s
+                                ON s.account_id = r.account_id
+                            AND s.rn         = r.rn + 1
+                            )
+                            SELECT
+                            r.date,
+                            r.category,
+                            r.description,
+                            r.account_id,
+                            r.amount,
+                            r.kind,
+                            r.balance
+                            FROM rec r
+                            ORDER BY r.date, r.account_id, r.category, r.description;
             """)
 
 # ---------- ACCOUNTS -----------------
@@ -255,7 +266,7 @@ def upsert_recurring_item(
     description: str,
     dateFrom: date,
     dateTo: Optional[date],
-    type_: str,
+    kind: str,
     amount: Decimal,
     enabled: bool,
     account_id: UUID
@@ -267,7 +278,7 @@ def upsert_recurring_item(
                 """
                 INSERT INTO recurring_items (
                     id, every, unit, category, description,
-                    date_from, date_to, "type", amount, enabled, account_id
+                    date_from, date_to, kind, amount, enabled, account_id
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (id) DO UPDATE SET
@@ -277,7 +288,7 @@ def upsert_recurring_item(
                     description = EXCLUDED.description,
                     date_from = EXCLUDED.date_from,
                     date_to = EXCLUDED.date_to,
-                    "type" = EXCLUDED."type",
+                    kind = EXCLUDED.kind,
                     amount = EXCLUDED.amount,
                     enabled = EXCLUDED.enabled,
                     account_id = EXCLUDED.account_id
@@ -290,7 +301,7 @@ def upsert_recurring_item(
                     description,
                     dateFrom,
                     dateTo,
-                    type_,
+                    kind,
                     amount,
                     enabled,
                     str(account_id)
@@ -319,7 +330,7 @@ def fetch_recurring_items(account_id: Optional[str] = None) -> List[Dict[str, An
             description,
             date_from AS "dateFrom",
             date_to AS "dateTo",
-            type,
+            kind,
             amount,
             enabled,
             account_id AS "accountId"
@@ -345,7 +356,7 @@ def upsert_single_item(
     date_: date,
     category: str,
     description: str,
-    type_: str,
+    kind: str,
     amount: Decimal,
     enabled: bool,
     account_id: UUID
@@ -356,19 +367,19 @@ def upsert_single_item(
             cur.execute(
                 """
                 INSERT INTO single_items (
-                    id, "date", category, description, "type", amount, enabled, account_id
+                    id, "date", category, description, kind, amount, enabled, account_id
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (id) DO UPDATE SET
                     "date" = EXCLUDED."date",
                     category = EXCLUDED.category,
                     description = EXCLUDED.description,
-                    "type" = EXCLUDED."type",
+                    kind = EXCLUDED.kind,
                     amount = EXCLUDED.amount,
                     enabled = EXCLUDED.enabled,
                     account_id = EXCLUDED.account_id
                 """,
-                (str(id), date_, category, description, type_, amount, enabled, str(account_id)),
+                (str(id), date_, category, description, kind, amount, enabled, str(account_id)),
             )
         conn.commit()
 
@@ -390,7 +401,7 @@ def fetch_single_items(account_id: Optional[str] = None) -> List[Dict[str, Any]]
             date,
             category,
             description,
-            type,
+            kind,
             amount,
             enabled,
             account_id as "accountId"
@@ -433,33 +444,17 @@ def update_current_values(
     conn.commit()      
 
 
-def fetch_account_movements(account_id: Optional[str] = None,
-                            until: Optional[date] = None) -> List[Dict[str, Any]]:
+def fetch_account_movements(account_id: str, until: Optional[date] = None) -> List[Dict[str, Any]]:
 
-    # Pick view + fields
-    if account_id is not None:
-        view_name = "account_movements_by_account"
-        fields = "date, category, description, account_id, amount, balance"
-    else:
-        view_name = "account_movements"
-        fields = "date, category, description, type, amount, cash, bank"
-
-    sql = f"SELECT {fields} FROM {view_name}"
-    where = []
-    params: list = []
-
-    # Conditions
-    if account_id is not None:
-        where.append("account_id = %s")
-        params.append(account_id)
+    sql = "SELECT date, category, description, account_id, amount, balance FROM account_movements_by_account"
+    where = ["account_id = %s"]
+    params: list = [until]
 
     if until is not None:
         where.append("date < %s")
         params.append(until)
 
-    if where:
-        sql += " WHERE " + " AND ".join(where)
-
+    sql += " WHERE " + " AND ".join(where)
     sql += " ORDER BY date"
 
     with get_cashflow_connection() as conn:
