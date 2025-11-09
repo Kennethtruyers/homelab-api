@@ -126,9 +126,9 @@ def init():
             """)
 
             cur.execute("""CREATE OR REPLACE VIEW combined_items AS
-                    SELECT date, category, description, type, amount, account_id, kind FROM recurring_items_projection
+                    SELECT date, category, description, amount, account_id, kind FROM recurring_items_projection
                         UNION
-                    SELECT date, category, description, type, amount, account_id, kind FROM single_items WHERE enabled = TRUE
+                    SELECT date, category, description, amount, account_id, kind FROM single_items WHERE enabled = TRUE
             """)
 
             cur.execute("""CREATE OR REPLACE VIEW account_movements_by_account AS
