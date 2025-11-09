@@ -20,6 +20,7 @@ def init():
                     id UUID PRIMARY KEY,
                     name TEXT NOT NULL, 
                     date DATE NOT NULL,
+                    endDate DATE NOT NULL,
                     amount NUMERIC(14,2) NOT NULL	
                 );
             """)
@@ -115,14 +116,6 @@ def init():
                     occurrence_index
                     FROM expanded
                     ORDER BY date;
-            """)
-
-            cur.execute("""CREATE TABLE IF NOT EXISTS current_values (
-                    bank_account_amount NUMERIC(14,2) NOT NULL,
-                    cash_amount NUMERIC(14,2) NOT NULL,
-                    range_start DATE NOT NULL,
-                    range_end DATE NOT NULL
-                );
             """)
 
             cur.execute("""CREATE OR REPLACE VIEW combined_items AS
@@ -227,39 +220,39 @@ def upsert_account(
     id: UUID,
     name: str,
     date: date,
-    amount: Decimal
-):
+    endDate: date,
+    amount: Decimal):
     """Insert or update an account by ID."""
     with get_cashflow_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
                 INSERT INTO accounts (
-                    id, name, date, amount
+                    id, name, date, endDate, amount
                 )
-                VALUES (%s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s)
                 ON CONFLICT (id) DO UPDATE SET
                     name = EXCLUDED.name,
                     date = EXCLUDED.date,
+                    endDate = EXCLUDED.endDate,
                     amount = EXCLUDED.amount
                 """,
                 (
                     str(id),
                     name,
                     date,
+                    endDate,
                     amount
                 ),
             )
         conn.commit()
 
-
 def fetch_accounts() -> List[Dict[str, Any]]:
-    sql = """SELECT id, name, date, amount FROM accounts;"""
+    sql = """SELECT id, name, date, endDate, amount FROM accounts;"""
     with get_cashflow_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(sql)
             return cur.fetchall()
-
 
 # ---------- RECURRING ITEMS ----------
 def upsert_recurring_item(
@@ -273,9 +266,7 @@ def upsert_recurring_item(
     kind: str,
     amount: Decimal,
     enabled: bool,
-    account_id: UUID
-):
-    """Insert or update a recurring item by ID."""
+    account_id: UUID):
     with get_cashflow_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -313,7 +304,6 @@ def upsert_recurring_item(
             )
         conn.commit()
 
-
 def delete_recurring_item(id: UUID) -> bool:
     """Delete recurring item by ID. Returns True if something was deleted."""
     with get_cashflow_connection() as conn:
@@ -350,11 +340,7 @@ def fetch_recurring_items(account_id: Optional[str] = None) -> List[Dict[str, An
             cur.execute(sql, params)
             return cur.fetchall()
 
-
-
-
 # ---------- SINGLE ITEMS ----------
-
 def upsert_single_item(
     id: UUID,
     date_: date,
@@ -363,8 +349,7 @@ def upsert_single_item(
     kind: str,
     amount: Decimal,
     enabled: bool,
-    account_id: UUID
-):
+    account_id: UUID):
     """Insert or update a single (one-off) item by ID."""
     with get_cashflow_connection() as conn:
         with conn.cursor() as cur:
@@ -386,7 +371,6 @@ def upsert_single_item(
                 (str(id), date_, category, description, kind, amount, enabled, str(account_id)),
             )
         conn.commit()
-
 
 def delete_single_item(id: UUID) -> bool:
     """Delete single item by ID. Returns True if something was deleted."""
@@ -424,30 +408,7 @@ def fetch_single_items(account_id: Optional[str] = None) -> List[Dict[str, Any]]
             cur.execute(sql, params)
             return cur.fetchall()
 
-# ---------- CURRENT VALUES ----------
-
-def update_current_values(
-    bank_account_amount: Decimal,
-    cash_amount: Decimal,
-    range_start: date,
-    range_end: date,
-):
-    """Overwrite the current values (table has only one row)."""
-    with get_cashflow_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                DELETE FROM current_values;
-                INSERT INTO current_values (
-                    bank_account_amount, cash_amount, range_start, range_end
-                )
-                VALUES (%s, %s, %s, %s);
-                """,
-                (bank_account_amount, cash_amount, range_start, range_end),
-            )
-    conn.commit()      
-
-
+# ---------- Account movements ----------
 def fetch_account_movements(account_id: str, until: Optional[date] = None) -> List[Dict[str, Any]]:
 
     sql = "SELECT date, category, description, account_id, amount, balance FROM account_movements_by_account"
@@ -465,10 +426,6 @@ def fetch_account_movements(account_id: str, until: Optional[date] = None) -> Li
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(sql, params)
             return cur.fetchall()
-
-
-
-def fetch_current_values() -> List[Dict[str, Any]]:
     sql = """
         SELECT
             bank_account_amount as "bank",

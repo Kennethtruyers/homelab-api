@@ -14,20 +14,17 @@ from cashflow.data import (
     fetch_accounts, upsert_account,
     upsert_recurring_item, fetch_recurring_items, delete_recurring_item, 
     upsert_single_item, fetch_single_items, delete_single_item, 
-    update_current_values, fetch_current_values, 
     fetch_account_movements )
 
 router = APIRouter()
 
 
 # ---------- Models ----------
-
 class IntervalUnit(str, Enum):
     days = "day"
     weeks = "week"
     months = "month"
     years = "year"
-
 
 class UpsertSingleItemRequest(BaseModel):
     id: Optional[UUID] = Field(None, description="Present to update, absent to create.")
@@ -38,7 +35,6 @@ class UpsertSingleItemRequest(BaseModel):
     amount: Decimal = Field(..., description="Negative for expenses, positive for income.")
     enabled: bool = Field(True, description="Whether this item is active.")
     accountId: UUID
-
 
 class UpsertRecurringItemRequest(BaseModel):
     id: Optional[UUID] = Field(None, description="Present to update, absent to create.")
@@ -59,29 +55,12 @@ class UpsertRecurringItemRequest(BaseModel):
             raise ValueError("date_to cannot be before dateFrom")
         return v
 
-
-class EditCurrentValuesRequest(BaseModel):
-    bank: Decimal = Field(..., description="Current bank account balance.")
-    cash: Decimal = Field(..., description="Current cash balance.")
-    start: date
-    end: date
-
-    @validator("bank", "cash")
-    def quantize_money(cls, v: Decimal) -> Decimal:
-        return v.quantize(Decimal("0.01"))
-
-    @validator("end")
-    def validate_range(cls, v: date, values) -> date:
-        if "start" in values and v < values["start"]:
-            raise ValueError("end cannot be before start")
-        return v
-
 class EditAccountRequest(BaseModel):
     id: Optional[UUID] = Field(None, description="Present to update, absent to create.")
     amount: Decimal = Field(..., description="Current cash balance.")
     name: str
-    date: date
-
+    date: date,
+    endDate: date
 
 @router.post("/recurring", status_code=status.HTTP_202_ACCEPTED, summary="Upsert recurring item")
 def upsert_recurring_item_api(payload: UpsertRecurringItemRequest):
@@ -101,7 +80,6 @@ def upsert_recurring_item_api(payload: UpsertRecurringItemRequest):
     )
     return {"status": "ok", "id": str(effective_id)}
 
-
 @router.post("/single", status_code=status.HTTP_202_ACCEPTED, summary="Upsert single item")
 def upsert_single_item_api(payload: UpsertSingleItemRequest):
     effective_id = payload.id or uuid4()
@@ -117,28 +95,15 @@ def upsert_single_item_api(payload: UpsertSingleItemRequest):
     )
     return {"status": "ok", "id": str(effective_id)}
 
-
 @router.delete("/recurring/{item_id}", status_code=status.HTTP_202_ACCEPTED, summary="Delete recurring item")
 def delete_recurring_item_api(item_id: UUID):
     deleted = delete_recurring_item(id=item_id)
     return {"status": "deleted" if deleted else "not_found", "id": str(item_id)}
 
-
 @router.delete("/single/{item_id}", status_code=status.HTTP_202_ACCEPTED, summary="Delete single item")
 def delete_single_item_api(item_id: UUID):
     deleted = delete_single_item(id=item_id)
     return {"status": "deleted" if deleted else "not_found", "id": str(item_id)}
-
-
-@router.put("/current-values", status_code=status.HTTP_202_ACCEPTED, summary="Edit current values")
-def edit_current_values_api(payload: EditCurrentValuesRequest):
-    update_current_values(
-        bank_account_amount=payload.bank,
-        cash_amount=payload.cash,
-        range_start=payload.start,
-        range_end=payload.end,
-    )
-    return {"status": "ok"}
 
 @router.get("/account-movements")
 def get_account_movements(accountId: str = Query(...), until: Optional[date] = Query(None)):
@@ -152,10 +117,6 @@ def get_single_items(accountId: Optional[str] = Query(None)):
 def get_recurring_items(accountId: Optional[str] = Query(None)):
     return fetch_recurring_items(accountId)
 
-@router.get("/current-values")
-def get_current_values():
-    return fetch_current_values()
-
 @router.get("/accounts")
 def get_accounts():
     return fetch_accounts()
@@ -168,5 +129,6 @@ def upsert_acount_api(payload: EditAccountRequest):
         amount=payload.amount,
         name=payload.name,
         date=payload.date,
+        endDate=payload.endDate
     )
     return {"status": "ok", "id": str(effective_id)}
