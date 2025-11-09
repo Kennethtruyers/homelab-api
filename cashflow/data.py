@@ -198,7 +198,7 @@ def init():
                                 s.account_id, s.rn, s.date, s.category, s.description, s.kind, s.amount,
                                 CASE
                                 WHEN s.kind = 'percent'
-                                    THEN r.balance * (1 + s.amount)   -- use (1 + s.amount/100.0) if you store 5 for 5%
+                                    THEN r.balance *  (1 + s.amount/100)   -- use (1 + s.amount/100.0) if you store 5 for 5%
                                 ELSE r.balance + s.amount
                                 END AS balance
                             FROM rec r
@@ -211,7 +211,11 @@ def init():
                             r.category,
                             r.description,
                             r.account_id,
-                            r.amount,
+							CASE
+                                WHEN r.kind = 'percent'
+                                    THEN r.balance - (r.balance /  (1 + r.amount/100))
+                                ELSE r.amount
+							END AS amount,
                             r.kind,
                             r.balance
                             FROM rec r
