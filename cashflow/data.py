@@ -792,7 +792,7 @@ def upsert_single_item(
 
 def upsert_single_item_override(
     id: UUID,
-    scenario_id: UUID,
+    scenarioId: UUID,
     op: str,
     targetSingleId: UUID,
     date_: date,
@@ -823,7 +823,7 @@ def upsert_single_item_override(
                     op = EXCLUDED.op,
                     target_single_id = EXCLUDED.target_single_id
                 """,
-                (str(id), date_, category, description, kind, amount, enabled, str(account_id), str(scenario_id), op, str(targetSingleId)),
+                (str(id), date_, category, description, kind, amount, enabled, str(account_id), str(scenarioId), op, str(targetSingleId)),
             )
         conn.commit()
 
