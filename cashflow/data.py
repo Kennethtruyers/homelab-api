@@ -752,7 +752,6 @@ def fetch_recurring_items_overrides(account_id: Optional[str] = None, scenario_i
     })
 
     sql += where_clause
-    sql += " ORDER BY date"
 
     with get_cashflow_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
