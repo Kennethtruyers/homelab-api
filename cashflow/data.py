@@ -741,7 +741,7 @@ def fetch_recurring_items(account_id: Optional[str] = None) -> List[Dict[str, An
 def fetch_recurring_items_overrides(account_id: Optional[str] = None, scenario_id : Optional(str) = None) -> List[Dict[str, Any]]:
     sql = """
         SELECT
-           id, scenario_id as scenarioId, op, target_recurring_id as targetRecurringId, every, unit, amount, 
+           id, scenario_id as "scenarioId", op, target_recurring_id as "targetRecurringId", every, unit, amount, 
             date_from as "dateFrom", date_to as "dateTo", enabled, category, description, kind, account_id as "accountId"
         FROM recurring_overrides
     """
