@@ -747,8 +747,8 @@ def fetch_recurring_items_overrides(account_id: Optional[str] = None, scenario_i
     """
 
     where_clause, params = build_where_clause({
-        "account_id": account_id,
-        "scenario_id": scenario_id
+        "account_id": ("=", account_id),
+        "scenario_id": ("=", scenario_id)
     })
 
     sql += where_clause
@@ -882,8 +882,8 @@ def fetch_single_items_overrides(account_id: Optional[str] = None, scenario_id: 
     """
 
     where_clause, params = build_where_clause({
-        "account_id": account_id,
-        "scenario_id": scenario_id
+        "account_id": ("=", account_id),
+        "scenario_id": ("=", scenario_id)
     })
 
     sql += where_clause
