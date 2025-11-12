@@ -735,7 +735,7 @@ def fetch_recurring_items(account_id: Optional[str] = None) -> List[Dict[str, An
             cur.execute(sql, params)
             return cur.fetchall()
 
-def fetch_recurring_items_overrides(account_id: Optional[str] = None, scenario_id : Optional(str)) -> List[Dict[str, Any]]:
+def fetch_recurring_items_overrides(account_id: Optional[str] = None, scenario_id : Optional(str) = None) -> List[Dict[str, Any]]:
     sql = """
         SELECT
            id, scenario_id as scenarioId, op, target_recurring_id as targetRecurringId, every, unit, amount, 
@@ -861,7 +861,7 @@ def fetch_single_items(account_id: Optional[str] = None) -> List[Dict[str, Any]]
             cur.execute(sql, params)
             return cur.fetchall()
 
-def fetch_single_items_overrides(account_id: Optional[str] = None, account_id: Optional[str] = None) -> List[Dict[str, Any]]:
+def fetch_single_items_overrides(account_id: Optional[str] = None, scenario_id: Optional[str] = None) -> List[Dict[str, Any]]:
     sql = """
         SELECT
             id,
@@ -884,8 +884,6 @@ def fetch_single_items_overrides(account_id: Optional[str] = None, account_id: O
     })
 
     sql += where_clause
-    sql += " ORDER BY date"
-
     sql += " ORDER BY date"
 
     with get_cashflow_connection() as conn:
