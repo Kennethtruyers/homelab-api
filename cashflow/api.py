@@ -237,7 +237,7 @@ def get_scenarios():
 @router.put("/scenarios", status_code=status.HTTP_202_ACCEPTED, summary="Upsert scenario")
 def upsert_scenario_api(payload: EditScenarioRequest):
     effective_id = payload.id or uuid4()
-    upsert_account(
+    upsert_scenario(
         id=effective_id,
         description=payload.description,
         name=payload.name
