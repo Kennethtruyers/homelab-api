@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field, validator
 from cashflow.data import ( 
     fetch_accounts, upsert_account,
     upsert_recurring_item, fetch_recurring_items, delete_recurring_item, upsert_recurring_item_override, fetch_recurring_items_overrides,
-    upsert_single_item, fetch_single_items, delete_single_item,  upsert_single_item_override, fetch_recurring_items_overrides,
+    upsert_single_item, fetch_single_items, delete_single_item,  upsert_single_item_override, fetch_single_items_overrides,
     upsert_scenario, fetch_scenarios,
     fetch_account_movements )
 
@@ -208,7 +208,7 @@ def get_single_overrides(accountId: Optional[str] = Query(None), scenarioId: Opt
 def get_recurring_items(accountId: Optional[str] = Query(None)):
     return fetch_recurring_items(accountId)
 
-@router.get("/recerring-override")
+@router.get("/recurring-override")
 def get_recurring_overrides(accountId: Optional[str] = Query(None), scenarioId: Optional[str] = Query(None)):
     return fetch_recurring_items_overrides(accountId, scenarioId)
 
