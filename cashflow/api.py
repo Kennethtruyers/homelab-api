@@ -49,9 +49,9 @@ class UpsertSingleOverrideRequest(BaseModel):
     kind: str
     amount: Decimal = Field(..., description="Negative for expenses, positive for income.")
     enabled: bool = Field(True, description="Whether this item is active.")
-    accountId: UUID,
-    scenarioId: UUID,
-    targetSingleId: UUID,
+    accountId: UUID
+    scenarioId: UUID
+    targetSingleId: UUID
     op: OpUnit
 
 class UpsertRecurringItemRequest(BaseModel):
@@ -84,9 +84,9 @@ class UpsertRecurringOverrideRequest(BaseModel):
     kind: str
     amount: Decimal = Field(..., description="Negative for expenses, positive for income.")
     enabled: bool = Field(True, description="Whether this recurring item is active.")
-    accountId: UUID,
-    scenarioId: UUID,
-    targetRecurringId: UUID,
+    accountId: UUID
+    scenarioId: UUID
+    targetRecurringId: UUID
     op: OpUnit
 
     @validator("dateTo")
@@ -106,7 +106,7 @@ class EditAccountRequest(BaseModel):
 
 class EditScenarioRequest(BaseModel):
     id: Optional[UUID] = Field(None, description="Present to update, absent to create.")
-    name: str,
+    name: str
     description: str
 
 @router.post("/recurring", status_code=status.HTTP_202_ACCEPTED, summary="Upsert recurring item")
