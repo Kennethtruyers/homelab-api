@@ -886,7 +886,7 @@ def fetch_single_items_overrides(account_id: Optional[str] = None, scenario_id: 
             amount,
             enabled,
             account_id as "accountId",
-            target_single_id as targetSingleId,
+            target_single_id as "targetSingleId",
             op,
             scenario_id as "scenarioId"
         FROM single_overrides
