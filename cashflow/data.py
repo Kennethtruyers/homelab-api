@@ -664,7 +664,7 @@ def upsert_recurring_item_override(
             cur.execute(
                 """
                 INSERT INTO recurring_overrides (
-                    id, scenario_id, op, target_recurring_id, every, unit, category, description, dateFrom, dateTo, kind, amount, enabled, account_id
+                    id, scenario_id, op, target_recurring_id, every, unit, category, description, date_from, date_to, kind, amount, enabled, account_id
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (id) DO UPDATE SET
