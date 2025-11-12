@@ -51,7 +51,7 @@ class UpsertSingleOverrideRequest(BaseModel):
     enabled: bool = Field(True, description="Whether this item is active.")
     accountId: UUID
     scenarioId: UUID
-    targetSingleId: Optional[UUID]
+    targetSingleId: Optional[UUID] = Field(None)
     op: OpUnit
 
 class UpsertRecurringItemRequest(BaseModel):
@@ -86,7 +86,7 @@ class UpsertRecurringOverrideRequest(BaseModel):
     enabled: bool = Field(True, description="Whether this recurring item is active.")
     accountId: UUID
     scenarioId: UUID
-    targetRecurringId: Optional[UUID]
+    targetRecurringId: Optional[UUID] = Field(None)
     op: OpUnit
 
     @validator("dateTo")
