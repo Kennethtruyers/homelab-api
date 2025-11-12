@@ -175,7 +175,7 @@ def upsert_single_override_api(payload: UpsertSingleOverrideRequest):
         amount=payload.amount,
         enabled=payload.enabled,
         account_id = payload.accountId,
-        targetRecurringId = payload.targetRecurringId,
+        targetSingleId = payload.targetSingleId,
         op = payload.op.value,
         scenarioId = payload.scenarioId
     )
