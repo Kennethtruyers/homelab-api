@@ -221,6 +221,297 @@ def init():
                     ORDER BY r.date, r.account_id, r.category, r.description;
             """)
 
+            cur.execute("""CREATE TABLE IF NOT EXISTS scenarios (
+                id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                name TEXT NOT NULL UNIQUE,
+                description TEXT
+                );
+            """)
+
+            cur.execute("""CREATE TABLE IF NOT EXISTS recurring_overrides (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                scenario_id UUID NOT NULL REFERENCES scenarios(id),
+                op TEXT NOT NULL CHECK (op IN ('add','replace')),
+
+                -- target for replace; NULL for add
+                target_recurring_id UUID NULL REFERENCES recurring_items(id),
+
+                -- fields allowed to change on replace (or required for add)
+                every INTEGER,
+                unit  TEXT CHECK (unit IN ('day','week','month','year')),
+                amount NUMERIC(14,2),
+                date_from DATE,
+                date_to DATE,
+                enabled BOOLEAN,
+
+                -- for ADD you must also supply these immutable fields:
+                category TEXT,
+                description TEXT,
+                kind TEXT CHECK (kind IN ('absolute','percent')),
+                account_id UUID
+                );
+            """)
+
+            cur.execute("""CREATE TABLE IF NOT EXISTS single_overrides (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                scenario_id UUID NOT NULL REFERENCES scenarios(id),
+                op TEXT NOT NULL CHECK (op IN ('add','replace')),
+
+                -- target for replace; NULL for add
+                target_single_id UUID NULL REFERENCES single_items(id),
+
+                -- fields allowed on replace (or required on add)
+                "date" DATE,
+                amount NUMERIC(14,2),
+                enabled BOOLEAN,
+
+                -- for ADD you must also supply these immutable fields:
+                category TEXT,
+                description TEXT,
+                kind TEXT CHECK (kind IN ('absolute','percent')),
+                account_id UUID
+                );
+            """)
+
+            cur.execute("""CREATE OR REPLACE FUNCTION recurring_items_projection_for(scenario_name TEXT)
+                RETURNS TABLE(
+                recurring_id UUID,
+                date DATE,
+                category TEXT,
+                description TEXT,
+                kind TEXT,
+                amount NUMERIC(14,2),
+                account_id UUID
+                )
+                LANGUAGE sql
+                AS $$
+                WITH
+                s AS (SELECT id FROM scenarios WHERE name = scenario_name),
+
+                -- Base + REPLACE (immutable cols preserved)
+                base_modified AS (
+                SELECT
+                    r.id,
+                    COALESCE(ro.every, r.every) AS every,
+                    COALESCE(ro.unit,  r.unit)  AS unit,
+                    r.category,
+                    r.description,
+                    COALESCE(ro.date_from, r.date_from) AS date_from,
+                    COALESCE(ro.date_to,   r.date_to)   AS date_to,
+                    r.kind,
+                    COALESCE(ro.amount, r.amount) AS amount,
+                    r.account_id,
+                    COALESCE(ro.enabled, r.enabled) AS enabled
+                FROM recurring_items r
+                LEFT JOIN recurring_overrides ro
+                    ON ro.target_recurring_id = r.id
+                AND ro.op = 'replace'
+                AND ro.scenario_id = (SELECT id FROM s)
+                WHERE TRUE
+                ),
+
+                -- ADD rows (all fields required)
+                adds AS (
+                SELECT
+                    gen_random_uuid() AS id,
+                    ro.every, ro.unit, ro.category, ro.description,
+                    ro.date_from, ro.date_to, ro.kind, ro.amount, ro.account_id,
+                    COALESCE(ro.enabled, TRUE) AS enabled
+                FROM recurring_overrides ro
+                JOIN s ON s.id = ro.scenario_id
+                WHERE ro.op = 'add'
+                ),
+
+                -- unified source
+                recurring_source AS (
+                SELECT * FROM base_modified
+                UNION ALL
+                SELECT * FROM adds
+                ),
+
+                bounds AS (
+                SELECT
+                    r.id                         AS recurring_id,
+                    r.every,
+                    r.unit,
+                    r.category,
+                    r.description,
+                    r.date_from,
+                    r.date_to,
+                    r.kind,
+                    r.amount,
+                    r.account_id,
+                    COALESCE(r.date_to, a.enddate) AS stop_date,
+                    CASE r.unit
+                    WHEN 'day'   THEN make_interval(days   => r.every)
+                    WHEN 'week'  THEN make_interval(days   => 7 * r.every)
+                    WHEN 'month' THEN make_interval(months => r.every)
+                    WHEN 'year'  THEN make_interval(years  => r.every)
+                    ELSE NULL
+                    END AS step
+                FROM recurring_source r
+                INNER JOIN accounts a ON a.id = r.account_id
+                WHERE r.enabled = TRUE
+                ),
+                expanded AS (
+                SELECT
+                    b.recurring_id,
+                    (gs)::date AS date,
+                    b.category,
+                    b.description,
+                    b.kind,
+                    b.amount,
+                    b.account_id
+                FROM bounds b
+                CROSS JOIN LATERAL generate_series(
+                    b.date_from::timestamp,
+                    b.stop_date::timestamp,
+                    b.step
+                ) AS gs
+                WHERE b.step IS NOT NULL
+                    AND b.date_from <= b.stop_date
+                )
+                SELECT
+                recurring_id, date, category, description, kind, amount, account_id
+                FROM expanded
+                ORDER BY date;
+            """)
+
+            cur.execute("""CREATE OR REPLACE FUNCTION combined_items_for(scenario_name TEXT)
+                RETURNS TABLE(
+                date DATE,
+                category TEXT,
+                description TEXT,
+                amount NUMERIC(14,2),
+                account_id UUID,
+                kind TEXT
+                )
+                LANGUAGE sql
+                AS $$
+                WITH
+                s AS (SELECT id FROM scenarios WHERE name = scenario_name),
+
+                base_modified AS (
+                SELECT
+                    si.id,
+                    COALESCE(so."date", si."date") AS "date",
+                    si.category,
+                    si.description,
+                    si.kind,
+                    COALESCE(so.amount, si.amount) AS amount,
+                    si.account_id,
+                    COALESCE(so.enabled, si.enabled) AS enabled
+                FROM single_items si
+                LEFT JOIN single_overrides so
+                    ON so.target_single_id = si.id
+                AND so.op = 'replace'
+                AND so.scenario_id = (SELECT id FROM s)
+                ),
+                adds AS (
+                SELECT
+                    gen_random_uuid() AS id,
+                    so."date", so.category, so.description, so.kind,
+                    so.amount, so.account_id,
+                    COALESCE(so.enabled, TRUE) AS enabled
+                FROM single_overrides so
+                JOIN s ON s.id = so.scenario_id
+                WHERE so.op = 'add'
+                ),
+                single_source AS (
+                SELECT id, "date", category, description, kind, amount, account_id, enabled FROM base_modified
+                UNION ALL
+                SELECT id, "date", category, description, kind, amount, account_id, enabled FROM adds
+                )
+                SELECT date, category, description, amount, account_id, kind
+                FROM (
+                SELECT date, category, description, amount, account_id, kind
+                FROM recurring_items_projection_for(scenario_name)
+                UNION ALL
+                SELECT "date", category, description, amount, account_id, kind
+                FROM single_source
+                WHERE enabled = TRUE
+                ) q
+                ORDER BY date;
+            """)
+
+            cur.execute("""CREATE OR REPLACE FUNCTION account_movements_by_account_for(scenario_name TEXT)
+                RETURNS TABLE(
+                date DATE,
+                category TEXT,
+                description TEXT,
+                account_id UUID,
+                amount NUMERIC(14,2),
+                kind TEXT,
+                balance NUMERIC(14,2),
+                type TEXT,
+                liquid BOOLEAN
+                )
+                LANGUAGE sql
+                AS $$
+                WITH RECURSIVE
+                anchors AS (
+                SELECT a.id AS account_id, a.name AS account_name, a.date AS anchor_date,
+                        a.amount::numeric AS opening_balance
+                FROM accounts a
+                ),
+                movements AS (
+                SELECT
+                    ci.date, ci.category, ci.description, ci.account_id,
+                    ci.amount::numeric, ci.kind::text, 1 AS ord
+                FROM combined_items_for(scenario_name) ci
+                JOIN anchors an ON an.account_id = ci.account_id
+                WHERE ci.account_id IS NOT NULL
+                    AND ci.date >= an.anchor_date
+                ),
+                opening AS (
+                SELECT an.anchor_date AS date, 'Opening Balance'::text AS category,
+                        an.account_name AS description, an.account_id,
+                        0::numeric AS amount, 'absolute'::text AS kind, 0 AS ord
+                FROM anchors an
+                ),
+                unioned AS (
+                SELECT date, category, description, account_id, amount, kind, ord FROM movements
+                UNION ALL
+                SELECT date, category, description, account_id, amount, kind, ord FROM opening
+                ),
+                sequenced AS (
+                SELECT u.*,
+                        ROW_NUMBER() OVER (PARTITION BY u.account_id ORDER BY u.date, u.ord, u.category, u.description) AS rn
+                FROM unioned u
+                ),
+                rec AS (
+                SELECT s.account_id, s.rn, s.date, s.category, s.description, s.kind,
+                        an.opening_balance AS amount, an.opening_balance AS balance
+                FROM sequenced s
+                JOIN anchors an ON an.account_id = s.account_id
+                WHERE s.rn = 1
+                UNION ALL
+                SELECT s.account_id, s.rn, s.date, s.category, s.description, s.kind, s.amount,
+                        CASE WHEN s.kind = 'percent'
+                            THEN r.balance * (1 + s.amount/100)
+                            ELSE r.balance + s.amount
+                        END AS balance
+                FROM rec r
+                JOIN sequenced s ON s.account_id = r.account_id AND s.rn = r.rn + 1
+                )
+                SELECT
+                r.date,
+                r.category,
+                r.description,
+                r.account_id,
+                CASE WHEN r.kind = 'percent'
+                    THEN r.balance - (r.balance / (1 + r.amount/100))
+                    ELSE r.amount
+                END AS amount,
+                r.kind,
+                r.balance,
+                a.type,
+                a.liquid
+                FROM rec r
+                JOIN accounts a ON a.id = r.account_id
+                ORDER BY r.date, r.account_id, r.category, r.description;
+            """)
+
 # ---------- ACCOUNTS -----------------
 def upsert_account(
     id: UUID,
