@@ -659,6 +659,9 @@ def upsert_recurring_item_override(
     amount: Decimal,
     enabled: bool,
     account_id: UUID):
+
+    target = None if targetRecurringId is None else str(targetRecurringId)
+
     with get_cashflow_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -686,7 +689,7 @@ def upsert_recurring_item_override(
                     str(id),
                     str(scenarioId),
                     op,
-                    str(targetRecurringId),
+                    target,
                     every,
                     unit,
                     category,
@@ -813,6 +816,9 @@ def upsert_single_item_override(
     enabled: bool,
     account_id: UUID):
     """Insert or update a single (one-off) override by ID."""
+
+    target = None if targetSingleId is None else str(targetSingleId)
+
     with get_cashflow_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -833,7 +839,7 @@ def upsert_single_item_override(
                     op = EXCLUDED.op,
                     target_single_id = EXCLUDED.target_single_id
                 """,
-                (str(id), date_, category, description, kind, amount, enabled, str(account_id), str(scenarioId), op, str(targetSingleId)),
+                (str(id), date_, category, description, kind, amount, enabled, str(account_id), str(scenarioId), op, target),
             )
         conn.commit()
 
