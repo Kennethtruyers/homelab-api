@@ -557,6 +557,40 @@ def fetch_accounts() -> List[Dict[str, Any]]:
             cur.execute(sql)
             return cur.fetchall()
 
+# ---------- Scenarios -----------------
+def upsert_scenario(
+    id: UUID,
+    name: str,
+    description: str):
+    """Insert or update a scenario by ID."""
+    with get_cashflow_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO scenarios (
+                    id, name, description
+                )
+                VALUES (%s, %s, %s)
+                ON CONFLICT (id) DO UPDATE SET
+                    name = EXCLUDED.name,
+                    description = EXCLUDED.description
+                """,
+                (
+                    str(id),
+                    name,
+                    description
+                ),
+            )
+        conn.commit()
+
+def fetch_scenarios() -> List[Dict[str, Any]]:
+    sql = """SELECT id, name, description FROM scenarios;"""
+    with get_cashflow_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(sql)
+            return cur.fetchall()
+
+
 # ---------- RECURRING ITEMS ----------
 def upsert_recurring_item(
     id: UUID,
@@ -607,11 +641,69 @@ def upsert_recurring_item(
             )
         conn.commit()
 
+def upsert_recurring_item_override(
+    id: UUID,
+    scenarioId: UUID,
+    op: str,
+    targetRecurringId: UUID
+    every: int,
+    unit: str,
+    category: str,
+    description: str,
+    dateFrom: date,
+    dateTo: Optional[date],
+    kind: str,
+    amount: Decimal,
+    enabled: bool,
+    account_id: UUID):
+    with get_cashflow_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO recurring_overrides (
+                    id, scenario_id, op, target_recurring_id, every, unit, amount, date_from, date_to, enabled, category, description, kind, account_id)
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (id) DO UPDATE SET
+                    scenario_id = EXCLUDED.scenario_id,
+                    op = EXCLUDED.op,
+                    target_recurring_id = EXCLUDED.target_recurring_id,
+                    every = EXCLUDED.every,
+                    unit = EXCLUDED.unit,
+                    category = EXCLUDED.category,
+                    description = EXCLUDED.description,
+                    date_from = EXCLUDED.date_from,
+                    date_to = EXCLUDED.date_to,
+                    kind = EXCLUDED.kind,
+                    amount = EXCLUDED.amount,
+                    enabled = EXCLUDED.enabled,
+                    account_id = EXCLUDED.account_id
+                """,
+                (
+                    str(id),
+                    str(scenarioId),
+                    op,
+                    str(targetRecurringId),
+                    every,
+                    unit,
+                    category,
+                    description,
+                    dateFrom,
+                    dateTo,
+                    kind,
+                    amount,
+                    enabled,
+                    str(account_id)
+                ),
+            )
+        conn.commit()
+
 def delete_recurring_item(id: UUID) -> bool:
     """Delete recurring item by ID. Returns True if something was deleted."""
     with get_cashflow_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM recurring_items WHERE id = %s", (str(id),))
+            cur.execute("DELETE FROM recurring_overrides WHERE target_recurring_id = %s", (str(id),))
             deleted = cur.rowcount > 0
         conn.commit()
 
@@ -637,6 +729,27 @@ def fetch_recurring_items(account_id: Optional[str] = None) -> List[Dict[str, An
     if account_id is not None:
         sql += " WHERE account_id = %s"
         params.append(account_id)
+
+    with get_cashflow_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(sql, params)
+            return cur.fetchall()
+
+def fetch_recurring_items_overrides(account_id: Optional[str] = None, scenario_id : Optional(str)) -> List[Dict[str, Any]]:
+    sql = """
+        SELECT
+           id, scenario_id as scenarioId, op, target_recurring_id as targetRecurringId, every, unit, amount, 
+            date_from as "dateFrom", date_to as "dateTo", enabled, category, description, kind, account_id as "accountId"
+        FROM recurring_overrides
+    """
+
+    where_clause, params = build_where_clause({
+        "account_id": account_id,
+        "scenario_id": scenario_id
+    })
+
+    sql += where_clause
+    sql += " ORDER BY date"
 
     with get_cashflow_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -672,6 +785,43 @@ def upsert_single_item(
                     account_id = EXCLUDED.account_id
                 """,
                 (str(id), date_, category, description, kind, amount, enabled, str(account_id)),
+            )
+        conn.commit()
+
+def upsert_single_item_override(
+    id: UUID,
+    scenario_id: UUID,
+    op: str,
+    targetSingleId: UUID,
+    date_: date,
+    category: str,
+    description: str,
+    kind: str,
+    amount: Decimal,
+    enabled: bool,
+    account_id: UUID):
+    """Insert or update a single (one-off) override by ID."""
+    with get_cashflow_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO single_overrides (
+                    id, "date", category, description, kind, amount, enabled, account_id, scenario_id, op, target_single_id
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (id) DO UPDATE SET
+                    "date" = EXCLUDED."date",
+                    category = EXCLUDED.category,
+                    description = EXCLUDED.description,
+                    kind = EXCLUDED.kind,
+                    amount = EXCLUDED.amount,
+                    enabled = EXCLUDED.enabled,
+                    account_id = EXCLUDED.account_id,
+                    scenario_id = EXCLUDED.scenario_id,
+                    op = EXCLUDED.op,
+                    target_single_id = EXCLUDED.target_single_id
+                """,
+                (str(id), date_, category, description, kind, amount, enabled, str(account_id), str(scenario_id), op, str(targetSingleId)),
             )
         conn.commit()
 
@@ -711,6 +861,38 @@ def fetch_single_items(account_id: Optional[str] = None) -> List[Dict[str, Any]]
             cur.execute(sql, params)
             return cur.fetchall()
 
+def fetch_single_items_overrides(account_id: Optional[str] = None, account_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    sql = """
+        SELECT
+            id,
+            date,
+            category,
+            description,
+            kind,
+            amount,
+            enabled,
+            account_id as "accountId",
+            target_single_id as targetSingleId,
+            op,
+            scenario_id as "scenarioId"
+        FROM single_overrides
+    """
+
+    where_clause, params = build_where_clause({
+        "account_id": account_id,
+        "scenario_id": scenario_id
+    })
+
+    sql += where_clause
+    sql += " ORDER BY date"
+
+    sql += " ORDER BY date"
+
+    with get_cashflow_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(sql, params)
+            return cur.fetchall()
+
 # ---------- Account movements ----------
 def fetch_account_movements(account_id: str, until: Optional[date] = None) -> List[Dict[str, Any]]:
 
@@ -741,3 +923,11 @@ def fetch_account_movements(account_id: str, until: Optional[date] = None) -> Li
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(sql)
             return cur.fetchall()
+
+def build_where_clause(conditions):
+    parts, params = [], []
+    for field, (op, value) in conditions.items():
+        if value is not None:
+            parts.append(f"{field} {op} %s")
+            params.append(value)
+    return (" WHERE " + " AND ".join(parts)) if parts else "", params
