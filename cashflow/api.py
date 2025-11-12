@@ -166,7 +166,7 @@ def upsert_recurring_override_api(payload: UpsertRecurringOverrideRequest):
     return {"status": "ok", "id": str(effective_id)}
 
 @router.delete("/recurring-override/{item_id}", status_code=status.HTTP_202_ACCEPTED, summary="Delete recurring item")
-def delete_recurring_item_api(item_id: UUID):
+def delete_recurring_item_override_api(item_id: UUID):
     deleted = delete_recurring_item_override(id=item_id)
     return {"status": "deleted" if deleted else "not_found", "id": str(item_id)}
 
@@ -220,8 +220,8 @@ def upsert_single_override_api(payload: UpsertSingleOverrideRequest):
     return {"status": "ok", "id": str(effective_id)}
 
 @router.delete("/single-override/{item_id}", status_code=status.HTTP_202_ACCEPTED, summary="Delete single item")
-def delete_single_item_api(item_id: UUID):
-    deleted = delete_single_override_item(id=item_id)
+def delete_single_item_override_api(item_id: UUID):
+    deleted = delete_single_item_override(id=item_id)
     return {"status": "deleted" if deleted else "not_found", "id": str(item_id)}
 
 # --- Account movements
