@@ -645,7 +645,7 @@ def upsert_recurring_item_override(
     id: UUID,
     scenarioId: UUID,
     op: str,
-    targetRecurringId: UUID
+    targetRecurringId: UUID,
     every: int,
     unit: str,
     category: str,
