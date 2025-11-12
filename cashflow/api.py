@@ -12,8 +12,8 @@ from fastapi import APIRouter, Request, Query, Response, status
 from pydantic import BaseModel, Field, validator
 from cashflow.data import ( 
     fetch_accounts, upsert_account,
-    upsert_recurring_item, fetch_recurring_items, delete_recurring_item, upsert_recurring_item_override, fetch_recurring_items_overrides,
-    upsert_single_item, fetch_single_items, delete_single_item,  upsert_single_item_override, fetch_single_items_overrides,
+    upsert_recurring_item, fetch_recurring_items, delete_recurring_item, upsert_recurring_item_override, fetch_recurring_items_overrides, delete_recurring_item_override,
+    upsert_single_item, fetch_single_items, delete_single_item,  upsert_single_item_override, fetch_single_items_overrides, delete_single_item_override,
     upsert_scenario, fetch_scenarios,
     fetch_account_movements )
 
@@ -109,6 +109,12 @@ class EditScenarioRequest(BaseModel):
     name: str
     description: str
 
+#--- Recurring items ---
+
+@router.get("/recurring")
+def get_recurring_items(accountId: Optional[str] = Query(None)):
+    return fetch_recurring_items(accountId)
+
 @router.post("/recurring", status_code=status.HTTP_202_ACCEPTED, summary="Upsert recurring item")
 def upsert_recurring_item_api(payload: UpsertRecurringItemRequest):
     effective_id = payload.id or uuid4()
@@ -126,6 +132,17 @@ def upsert_recurring_item_api(payload: UpsertRecurringItemRequest):
         account_id = payload.accountId
     )
     return {"status": "ok", "id": str(effective_id)}
+
+@router.delete("/recurring/{item_id}", status_code=status.HTTP_202_ACCEPTED, summary="Delete recurring item")
+def delete_recurring_item_api(item_id: UUID):
+    deleted = delete_recurring_item(id=item_id)
+    return {"status": "deleted" if deleted else "not_found", "id": str(item_id)}
+
+# --- Recurring overrides
+
+@router.get("/recurring-override")
+def get_recurring_overrides(accountId: Optional[str] = Query(None), scenarioId: Optional[str] = Query(None)):
+    return fetch_recurring_items_overrides(accountId, scenarioId)
 
 @router.post("/recurring-override", status_code=status.HTTP_202_ACCEPTED, summary="Upsert recurring override")
 def upsert_recurring_override_api(payload: UpsertRecurringOverrideRequest):
@@ -148,6 +165,17 @@ def upsert_recurring_override_api(payload: UpsertRecurringOverrideRequest):
     )
     return {"status": "ok", "id": str(effective_id)}
 
+@router.delete("/recurring-override/{item_id}", status_code=status.HTTP_202_ACCEPTED, summary="Delete recurring item")
+def delete_recurring_item_api(item_id: UUID):
+    deleted = delete_recurring_item_override(id=item_id)
+    return {"status": "deleted" if deleted else "not_found", "id": str(item_id)}
+
+#--- Single Items ---
+
+@router.get("/single")
+def get_single_items(accountId: Optional[str] = Query(None)):
+    return fetch_single_items(accountId)
+
 @router.post("/single", status_code=status.HTTP_202_ACCEPTED, summary="Upsert single item")
 def upsert_single_item_api(payload: UpsertSingleItemRequest):
     effective_id = payload.id or uuid4()
@@ -162,6 +190,16 @@ def upsert_single_item_api(payload: UpsertSingleItemRequest):
         account_id = payload.accountId
     )
     return {"status": "ok", "id": str(effective_id)}
+
+@router.delete("/single/{item_id}", status_code=status.HTTP_202_ACCEPTED, summary="Delete single item")
+def delete_single_item_api(item_id: UUID):
+    deleted = delete_single_item(id=item_id)
+    return {"status": "deleted" if deleted else "not_found", "id": str(item_id)}
+# --- Single overrides
+
+@router.get("/single-override")
+def get_single_overrides(accountId: Optional[str] = Query(None), scenarioId: Optional[str] = Query(None)):
+    return fetch_single_items_overrides(accountId, scenarioId)
 
 @router.post("/single-override", status_code=status.HTTP_202_ACCEPTED, summary="Upsert single override")
 def upsert_single_override_api(payload: UpsertSingleOverrideRequest):
@@ -181,36 +219,18 @@ def upsert_single_override_api(payload: UpsertSingleOverrideRequest):
     )
     return {"status": "ok", "id": str(effective_id)}
 
-
-@router.delete("/recurring/{item_id}", status_code=status.HTTP_202_ACCEPTED, summary="Delete recurring item")
-def delete_recurring_item_api(item_id: UUID):
-    deleted = delete_recurring_item(id=item_id)
-    return {"status": "deleted" if deleted else "not_found", "id": str(item_id)}
-
-@router.delete("/single/{item_id}", status_code=status.HTTP_202_ACCEPTED, summary="Delete single item")
+@router.delete("/single-override/{item_id}", status_code=status.HTTP_202_ACCEPTED, summary="Delete single item")
 def delete_single_item_api(item_id: UUID):
-    deleted = delete_single_item(id=item_id)
+    deleted = delete_single_override_item(id=item_id)
     return {"status": "deleted" if deleted else "not_found", "id": str(item_id)}
+
+# --- Account movements
 
 @router.get("/account-movements")
 def get_account_movements(accountId: str = Query(...), until: Optional[date] = Query(None)):
     return fetch_account_movements(accountId, until)
 
-@router.get("/single")
-def get_single_items(accountId: Optional[str] = Query(None)):
-    return fetch_single_items(accountId)
-
-@router.get("/single-override")
-def get_single_overrides(accountId: Optional[str] = Query(None), scenarioId: Optional[str] = Query(None)):
-    return fetch_single_items_overrides(accountId, scenarioId)
-
-@router.get("/recurring")
-def get_recurring_items(accountId: Optional[str] = Query(None)):
-    return fetch_recurring_items(accountId)
-
-@router.get("/recurring-override")
-def get_recurring_overrides(accountId: Optional[str] = Query(None), scenarioId: Optional[str] = Query(None)):
-    return fetch_recurring_items_overrides(accountId, scenarioId)
+# --- Accounts
 
 @router.get("/accounts")
 def get_accounts():
@@ -230,6 +250,7 @@ def upsert_acount_api(payload: EditAccountRequest):
     )
     return {"status": "ok", "id": str(effective_id)}
 
+# --- Scenarios
 @router.get("/scenarios")
 def get_scenarios():
     return fetch_scenarios()

@@ -758,6 +758,16 @@ def fetch_recurring_items_overrides(account_id: Optional[str] = None, scenario_i
             cur.execute(sql, params)
             return cur.fetchall()
 
+def delete_recurring_item_override(id: UUID) -> bool:
+    """Delete recurring item by ID. Returns True if something was deleted."""
+    with get_cashflow_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM recurring_overrides WHERE id = %s", (str(id),))
+            deleted = cur.rowcount > 0
+        conn.commit()
+
+    return deleted
+
 # ---------- SINGLE ITEMS ----------
 def upsert_single_item(
     id: UUID,
@@ -833,6 +843,8 @@ def delete_single_item(id: UUID) -> bool:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM single_items WHERE id = %s", (str(id),))
             deleted = cur.rowcount > 0
+
+            cur.execute("DELETE FROM single_overrides WHERE target_single_id = %s", (str(id),))
         conn.commit()
 
     return deleted
@@ -892,6 +904,17 @@ def fetch_single_items_overrides(account_id: Optional[str] = None, scenario_id: 
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(sql, params)
             return cur.fetchall()
+
+def delete_single_item_override(id: UUID) -> bool:
+    """Delete single item by ID. Returns True if something was deleted."""
+    with get_cashflow_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM single_overrides WHERE id = %s", (str(id),))
+            deleted = cur.rowcount > 0
+        conn.commit()
+
+    return deleted
+
 
 # ---------- Account movements ----------
 def fetch_account_movements(account_id: str, until: Optional[date] = None) -> List[Dict[str, Any]]:
