@@ -130,7 +130,7 @@ def upsert_recurring_item_api(payload: UpsertRecurringItemRequest):
 @router.post("/recurring-override", status_code=status.HTTP_202_ACCEPTED, summary="Upsert recurring override")
 def upsert_recurring_override_api(payload: UpsertRecurringOverrideRequest):
     effective_id = payload.id or uuid4()
-    upsert_recurring_item(
+    upsert_recurring_item_override(
         id=effective_id,
         every=payload.every,
         unit=payload.unit.value,
@@ -166,7 +166,7 @@ def upsert_single_item_api(payload: UpsertSingleItemRequest):
 @router.post("/single-override", status_code=status.HTTP_202_ACCEPTED, summary="Upsert single override")
 def upsert_single_override_api(payload: UpsertSingleOverrideRequest):
     effective_id = payload.id or uuid4()
-    upsert_single_item(
+    upsert_single_item_override(
         id=effective_id,
         date_=payload.date,
         category=payload.category,
