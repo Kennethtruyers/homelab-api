@@ -375,6 +375,7 @@ def init():
                 recurring_id, date, category, description, kind, amount, account_id
                 FROM expanded
                 ORDER BY date;
+                $$
             """)
 
             cur.execute("""CREATE OR REPLACE FUNCTION combined_items_for(scenario_name TEXT)
@@ -432,6 +433,7 @@ def init():
                 WHERE enabled = TRUE
                 ) q
                 ORDER BY date;
+                $$
             """)
 
             cur.execute("""CREATE OR REPLACE FUNCTION account_movements_by_account_for(scenario_name TEXT)
@@ -510,6 +512,7 @@ def init():
                 FROM rec r
                 JOIN accounts a ON a.id = r.account_id
                 ORDER BY r.date, r.account_id, r.category, r.description;
+                $$
             """)
 
 # ---------- ACCOUNTS -----------------
