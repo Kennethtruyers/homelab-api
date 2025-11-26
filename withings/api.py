@@ -71,7 +71,7 @@ def upsert(userid, startdate, enddate):
         196, # Electrodermal Activity (feet)
         226, # Basal Metabolic Rate (BMR)
         229, # Electrochemical Skin Conductance
-    ], None, None)
+    ], startdate, enddate)
 
     if not response:
         return {"status": "ok", "message": "no data", "count": 0}
