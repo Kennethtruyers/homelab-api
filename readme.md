@@ -25,4 +25,8 @@
 
 - `/workouts/sync`: Load all workouts and reingests to Postgres
 
+## Cashflow
+
+App to manage finance forecast
+
 
