@@ -280,7 +280,6 @@ EXERCISES_META = """
     ('Crunch','', 'reps','minor'),
     ('Reverse Crunch','', 'reps','minor'),
     ('Reverse Crunch','Incline','reps','minor'),
-    ('Incline Reverse Crunch','', 'reps','minor'),
     ('Leg Raise + Reverse Crunch','', 'reps','minor'),
     ('Sit-Up','', 'reps','minor'),
     ('Sit-Up','Incline','reps','minor'),
@@ -405,15 +404,19 @@ TAXONOMY_MAPPING_SQL = """
     INSERT INTO exercise_target_map VALUES
     ('Bicep Curl','Zottman','upper',1.0),
     ('Bicep Curl','Zottman','upper.arms',1.0),
-    ('Bicep Curl','Zottman','upper.arms.brachioradialis',0.50),
-    ('Bicep Curl','Zottman','upper.arms.biceps_brachii.long_head',0.30),
-    ('Bicep Curl','Zottman','upper.arms.biceps_brachii.short_head',0.20)
+    ('Bicep Curl','Zottman','upper.arms.brachioradialis',0.45),
+    ('Bicep Curl','Zottman','upper.arms.biceps_brachii.long_head',0.25),
+    ('Bicep Curl','Zottman','upper.arms.biceps_brachii.short_head',0.15),
+    ('Bicep Curl','Zottman','upper.forearms.extensors',0.15)
     ON CONFLICT DO NOTHING;
 
     INSERT INTO exercise_target_map VALUES
     ('Reverse Curl','', 'upper',1.0),
-    ('Reverse Curl','', 'upper.forearms',1.0),
-    ('Reverse Curl','', 'upper.forearms.extensors',1.0)
+    ('Reverse Curl','', 'upper.arms',0.80),
+    ('Reverse Curl','', 'upper.arms.brachioradialis',0.50),
+    ('Reverse Curl','', 'upper.arms.brachialis',0.30),
+    ('Reverse Curl','', 'upper.forearms',0.20),
+    ('Reverse Curl','', 'upper.forearms.extensors',0.20)
     ON CONFLICT DO NOTHING;
 
     INSERT INTO exercise_target_map VALUES
@@ -554,7 +557,8 @@ TAXONOMY_MAPPING_SQL = """
     INSERT INTO exercise_target_map VALUES
     ('Lat Pullover','', 'upper',1.0),
     ('Lat Pullover','', 'upper.back',1.0),
-    ('Lat Pullover','', 'upper.back.latissimus_dorsi',0.80),
+    ('Lat Pullover','', 'upper.back.latissimus_dorsi',0.70),
+    ('Lat Pullover','', 'upper.back.teres_major',0.10),
     ('Lat Pullover','', 'upper.arms.triceps_brachii.long_head',0.20)
     ON CONFLICT DO NOTHING;
 
@@ -619,9 +623,12 @@ TAXONOMY_MAPPING_SQL = """
     INSERT INTO exercise_target_map VALUES
     ('Bird dog plank','', 'core',1.0),
     ('Bird dog plank','', 'core.spinal_erectors',1.0),
-    ('Bird dog plank','', 'core.deep.multifidus',0.50),
-    ('Bird dog plank','', 'core.spinal_erectors.lumbar',0.30),
-    ('Bird dog plank','', 'lower.glutes.gluteus_maximus',0.20)
+    ('Bird dog plank','', 'core.deep.multifidus',0.35),
+    ('Bird dog plank','', 'core.spinal_erectors.lumbar',0.25),
+    ('Bird dog plank','', 'lower',0.45),
+    ('Bird dog plank','', 'lower.glutes.gluteus_maximus',0.15),
+    ('Bird dog plank','', 'lower.glutes.gluteus_medius',0.20),
+    ('Bird dog plank','', 'lower.glutes.gluteus_minimus',0.10)
     ON CONFLICT DO NOTHING;
 
     INSERT INTO exercise_target_map VALUES
@@ -641,9 +648,10 @@ TAXONOMY_MAPPING_SQL = """
 
     INSERT INTO exercise_target_map VALUES
     ('Side Plank with Hip Drops','', 'core',1.0),
-    ('Side Plank with Hip Drops','', 'core.obliques.external',0.50),
-    ('Side Plank with Hip Drops','', 'core.obliques.internal',0.30),
-    ('Side Plank with Hip Drops','', 'core.deep.transversus_abdominis',0.20)
+    ('Side Plank with Hip Drops','', 'core.obliques.external',0.45),
+    ('Side Plank with Hip Drops','', 'core.obliques.internal',0.25),
+    ('Side Plank with Hip Drops','', 'core.deep.transversus_abdominis',0.15),
+    ('Side Plank with Hip Drops','', 'lower.glutes.gluteus_medius',0.15)
     ON CONFLICT DO NOTHING;
 
     INSERT INTO exercise_target_map VALUES
@@ -670,26 +678,32 @@ TAXONOMY_MAPPING_SQL = """
 
     INSERT INTO exercise_target_map VALUES
     ('Sit-Up','', 'core',1.0),
-    ('Sit-Up','', 'core.abs.rectus_abdominis',1.0)
+    ('Sit-Up','', 'core.abs',1.0),
+    ('Sit-Up','', 'core.abs.rectus_abdominis',0.55),
+    ('Sit-Up','', 'core.hip_flexors',0.45)
     ON CONFLICT DO NOTHING;
 
     -- Hips / Glutes / Lower
     INSERT INTO exercise_target_map VALUES
     ('RDL','', 'lower',1.0),
     ('RDL','', 'lower.hamstrings',1.0),
-    ('RDL','', 'lower.hamstrings.semitendinosus',0.30),
-    ('RDL','', 'lower.hamstrings.semimembranosus',0.30),
-    ('RDL','', 'lower.hamstrings.biceps_femoris.long_head',0.30),
-    ('RDL','', 'lower.glutes.gluteus_maximus',0.10)
+    ('RDL','', 'lower.hamstrings.semitendinosus',0.28),
+    ('RDL','', 'lower.hamstrings.semimembranosus',0.28),
+    ('RDL','', 'lower.hamstrings.biceps_femoris.long_head',0.28),
+    ('RDL','', 'lower.hamstrings.biceps_femoris.short_head',0.10),
+    ('RDL','', 'lower.glutes.gluteus_maximus',0.10),
+    ('RDL','', 'core.spinal_erectors.lumbar',0.06)
     ON CONFLICT DO NOTHING;
 
     INSERT INTO exercise_target_map VALUES
     ('Step back Lunge','', 'lower',1.0),
     ('Step back Lunge','', 'lower.quads',1.0),
-    ('Step back Lunge','', 'lower.quads.rectus_femoris',0.30),
+    ('Step back Lunge','', 'lower.quads.rectus_femoris',0.25),
     ('Step back Lunge','', 'lower.quads.vastus_lateralis',0.20),
     ('Step back Lunge','', 'lower.quads.vastus_medialis',0.20),
     ('Step back Lunge','', 'lower.glutes.gluteus_maximus',0.20),
+    ('Step back Lunge','', 'lower.glutes.gluteus_medius',0.20),
+    ('Step back Lunge','', 'lower.glutes.gluteus_minimus',0.10),
     ('Step back Lunge','', 'lower.hamstrings.semitendinosus',0.10)
     ON CONFLICT DO NOTHING;
 
@@ -821,9 +835,13 @@ TAXONOMY_MAPPING_SQL = """
     ON CONFLICT DO NOTHING;
 
     INSERT INTO exercise_target_map VALUES
-    ('Prone Y Raises','', 'core',1.0),
-    ('Prone Y Raises','', 'core.spinal_erectors',1.0),
-    ('Prone Y Raises','', 'core.spinal_erectors.thoracic',0.70)
+    ('Prone Y Raises','', 'upper',0.70),
+    ('Prone Y Raises','', 'upper.back',0.50),
+    ('Prone Y Raises','', 'upper.back.trapezius.lower',0.35),
+    ('Prone Y Raises','', 'upper.back.rhomboids',0.15),
+    ('Prone Y Raises','', 'upper.shoulders',0.50),
+    ('Prone Y Raises','', 'upper.shoulders.deltoid.posterior',0.30),
+    ('Prone Y Raises','', 'upper.chest.serratus_anterior',0.20)
     ON CONFLICT DO NOTHING;
 
     INSERT INTO exercise_target_map VALUES
@@ -867,17 +885,22 @@ TAXONOMY_MAPPING_SQL = """
 
     INSERT INTO exercise_target_map VALUES
     ('Side Plank','', 'core',1.0),
-    ('Side Plank','', 'core.obliques.external',0.50),
-    ('Side Plank','', 'core.obliques.internal',0.30),
-    ('Side Plank','', 'core.deep.transversus_abdominis',0.20)
+    ('Side Plank','', 'core.obliques.external',0.40),
+    ('Side Plank','', 'core.obliques.internal',0.25),
+    ('Side Plank','', 'core.deep.transversus_abdominis',0.15),
+    ('Side Plank','', 'lower.glutes.gluteus_medius',0.25),
+    ('Side Plank','', 'lower.glutes.gluteus_minimus',0.10)
     ON CONFLICT DO NOTHING;
 
     INSERT INTO exercise_target_map VALUES
     ('Side Plank','Copenhagen', 'lower',1.0),
     ('Side Plank','Copenhagen', 'lower.adductors',1.0),
-    ('Side Plank','Copenhagen', 'lower.adductors.adductor_magnus',0.50),
-    ('Side Plank','Copenhagen', 'core.obliques.external',0.30),
-    ('Side Plank','Copenhagen', 'core.deep.transversus_abdominis',0.20)
+    ('Side Plank','Copenhagen', 'lower.adductors.adductor_longus',0.25),
+    ('Side Plank','Copenhagen', 'lower.adductors.adductor_magnus',0.30),
+    ('Side Plank','Copenhagen', 'lower.glutes.gluteus_medius',0.20),
+    ('Side Plank','Copenhagen', 'lower.glutes.gluteus_minimus',0.10),
+    ('Side Plank','Copenhagen', 'core.obliques.external',0.25),
+    ('Side Plank','Copenhagen', 'core.deep.transversus_abdominis',0.15)
     ON CONFLICT DO NOTHING;
 
     INSERT INTO exercise_target_map VALUES
@@ -897,6 +920,7 @@ TAXONOMY_MAPPING_SQL = """
     ('Bulgarian Split Squat','', 'lower.glutes',0.80),
     ('Bulgarian Split Squat','', 'lower.glutes.gluteus_maximus',0.60),
     ('Bulgarian Split Squat','', 'lower.glutes.gluteus_medius',0.20),
+    ('Bulgarian Split Squat','', 'lower.glutes.gluteus_minimus',0.10),
     ('Bulgarian Split Squat','', 'lower.hamstrings',0.40),
     ('Bulgarian Split Squat','', 'lower.adductors',0.30),
     ('Bulgarian Split Squat','', 'core',0.20)
@@ -908,48 +932,59 @@ TAXONOMY_MAPPING_SQL = """
     ('Hamstring Floor Curl','', 'lower.hamstrings.biceps_femoris.long_head',0.50),
     ('Hamstring Floor Curl','', 'lower.hamstrings.semitendinosus',0.30),
     ('Hamstring Floor Curl','', 'lower.hamstrings.semimembranosus',0.20),
-    ('Hamstring Floor Curl','', 'lower.glutes',0.30),
-    ('Hamstring Floor Curl','', 'lower.calves',0.20),
-    ('Hamstring Floor Curl','', 'core',0.20)
+    ('Hamstring Floor Curl','', 'lower.glutes.gluteus_maximus',0.25),
+    ('Hamstring Floor Curl','', 'lower.glutes.gluteus_medius',0.15),
+    ('Hamstring Floor Curl','', 'lower.glutes.gluteus_minimus',0.05),
+    ('Hamstring Floor Curl','', 'core.deep.transversus_abdominis',0.15)
     ON CONFLICT DO NOTHING;
 
     INSERT INTO exercise_target_map VALUES
     ('Squat','', 'lower',1.0),
     ('Squat','', 'lower.quads',1.0),
-    ('Squat','', 'lower.quads.vastus_lateralis',0.25),
-    ('Squat','', 'lower.quads.vastus_medialis',0.25),
-    ('Squat','', 'lower.quads.rectus_femoris',0.20),
-    ('Squat','', 'lower.glutes.gluteus_maximus',0.20),
-    ('Squat','', 'lower.hamstrings.semitendinosus',0.10)
+    ('Squat','', 'lower.quads.vastus_lateralis',0.22),
+    ('Squat','', 'lower.quads.vastus_medialis',0.22),
+    ('Squat','', 'lower.quads.rectus_femoris',0.18),
+    ('Squat','', 'lower.quads.vastus_intermedius',0.08),
+    ('Squat','', 'lower.glutes.gluteus_maximus',0.18),
+    ('Squat','', 'lower.glutes.gluteus_medius',0.15),
+    ('Squat','', 'lower.glutes.gluteus_minimus',0.05),
+    ('Squat','', 'lower.hamstrings.semitendinosus',0.10),
+    ('Squat','', 'core.spinal_erectors.lumbar',0.07)
     ON CONFLICT DO NOTHING;
 
     INSERT INTO exercise_target_map VALUES
     ('Pistol Squat','', 'lower',1.0),
     ('Pistol Squat','', 'lower.quads',1.0),
-    ('Pistol Squat','', 'lower.quads.vastus_lateralis',0.25),
-    ('Pistol Squat','', 'lower.quads.vastus_medialis',0.25),
-    ('Pistol Squat','', 'lower.quads.rectus_femoris',0.20),
-    ('Pistol Squat','', 'lower.glutes.gluteus_maximus',0.20),
+    ('Pistol Squat','', 'lower.quads.vastus_lateralis',0.22),
+    ('Pistol Squat','', 'lower.quads.vastus_medialis',0.22),
+    ('Pistol Squat','', 'lower.quads.rectus_femoris',0.18),
+    ('Pistol Squat','', 'lower.glutes.gluteus_maximus',0.18),
+    ('Pistol Squat','', 'lower.glutes.gluteus_medius',0.40),
+    ('Pistol Squat','', 'lower.glutes.gluteus_minimus',0.15),
     ('Pistol Squat','', 'lower.hamstrings.semitendinosus',0.10)
     ON CONFLICT DO NOTHING;
 
     INSERT INTO exercise_target_map VALUES
     ('Reverse Lunge','', 'lower',1.0),
     ('Reverse Lunge','', 'lower.quads',1.0),
-    ('Reverse Lunge','', 'lower.quads.vastus_lateralis',0.20),
-    ('Reverse Lunge','', 'lower.quads.vastus_medialis',0.20),
-    ('Reverse Lunge','', 'lower.quads.rectus_femoris',0.20),
-    ('Reverse Lunge','', 'lower.glutes.gluteus_maximus',0.25),
+    ('Reverse Lunge','', 'lower.quads.vastus_lateralis',0.18),
+    ('Reverse Lunge','', 'lower.quads.vastus_medialis',0.18),
+    ('Reverse Lunge','', 'lower.quads.rectus_femoris',0.18),
+    ('Reverse Lunge','', 'lower.glutes.gluteus_maximus',0.22),
+    ('Reverse Lunge','', 'lower.glutes.gluteus_medius',0.25),
+    ('Reverse Lunge','', 'lower.glutes.gluteus_minimus',0.10),
     ('Reverse Lunge','', 'lower.hamstrings.semitendinosus',0.15)
     ON CONFLICT DO NOTHING;
 
     INSERT INTO exercise_target_map VALUES
     ('Lunge','', 'lower',1.0),
     ('Lunge','', 'lower.quads',1.0),
-    ('Lunge','', 'lower.quads.vastus_lateralis',0.25),
-    ('Lunge','', 'lower.quads.vastus_medialis',0.25),
-    ('Lunge','', 'lower.quads.rectus_femoris',0.20),
-    ('Lunge','', 'lower.glutes.gluteus_maximus',0.20),
+    ('Lunge','', 'lower.quads.vastus_lateralis',0.22),
+    ('Lunge','', 'lower.quads.vastus_medialis',0.22),
+    ('Lunge','', 'lower.quads.rectus_femoris',0.18),
+    ('Lunge','', 'lower.glutes.gluteus_maximus',0.18),
+    ('Lunge','', 'lower.glutes.gluteus_medius',0.25),
+    ('Lunge','', 'lower.glutes.gluteus_minimus',0.10),
     ('Lunge','', 'lower.hamstrings.semitendinosus',0.10)
     ON CONFLICT DO NOTHING;
 
@@ -1000,8 +1035,11 @@ TAXONOMY_MAPPING_SQL = """
     INSERT INTO exercise_target_map VALUES
     ('Superman','', 'core',1.0),
     ('Superman','', 'core.spinal_erectors',1.0),
-    ('Superman','', 'core.spinal_erectors.lumbar',0.60),
-    ('Superman','', 'core.spinal_erectors.thoracic',0.40)
+    ('Superman','', 'core.spinal_erectors.lumbar',0.45),
+    ('Superman','', 'core.spinal_erectors.thoracic',0.25),
+    ('Superman','', 'lower',0.35),
+    ('Superman','', 'lower.glutes.gluteus_maximus',0.20),
+    ('Superman','', 'lower.hamstrings.semitendinosus',0.10)
     ON CONFLICT DO NOTHING;
 
     INSERT INTO exercise_target_map VALUES
