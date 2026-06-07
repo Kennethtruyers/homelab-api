@@ -22,7 +22,7 @@ def init():
                     date DATE NOT NULL,
                     endDate DATE NOT NULL,
                     amount NUMERIC(14,2) NOT NULL,
-                    type string,
+                    type TEXT,
                     liquid bool	
                 );
             """)
