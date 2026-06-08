@@ -1,0 +1,85 @@
+"path","name","parent_path","depth"
+"core","Core",NULL,1
+"core.abs","Abs","core",2
+"core.abs.rectus_abdominis","Rectus Abdominis","core.abs",3
+"core.deep","Deep Core","core",2
+"core.deep.multifidus","Multifidus","core.deep",3
+"core.deep.quadratus_lumborum","Quadratus Lumborum","core.deep",3
+"core.deep.transversus_abdominis","Transversus Abdominis","core.deep",3
+"core.hip_flexors","Hip Flexors","core",2
+"core.obliques","Obliques","core",2
+"core.obliques.external","External Obliques","core.obliques",3
+"core.obliques.internal","Internal Obliques","core.obliques",3
+"core.spinal_erectors","Spinal Erectors","core",2
+"core.spinal_erectors.lumbar","Erector Spinae (Lumbar)","core.spinal_erectors",3
+"core.spinal_erectors.thoracic","Erector Spinae (Thoracic)","core.spinal_erectors",3
+"lower","Lower Body",NULL,1
+"lower.adductors","Adductors","lower",2
+"lower.adductors.adductor_brevis","Adductor Brevis","lower.adductors",3
+"lower.adductors.adductor_longus","Adductor Longus","lower.adductors",3
+"lower.adductors.adductor_magnus","Adductor Magnus","lower.adductors",3
+"lower.adductors.gracilis","Gracilis","lower.adductors",3
+"lower.adductors.pectineus","Pectineus","lower.adductors",3
+"lower.calves","Calves","lower",2
+"lower.calves.gastrocnemius","Gastrocnemius","lower.calves",3
+"lower.calves.gastrocnemius.lateral","Gastrocnemius Lateral","lower.calves.gastrocnemius",4
+"lower.calves.gastrocnemius.medial","Gastrocnemius Medial","lower.calves.gastrocnemius",4
+"lower.calves.soleus","Soleus","lower.calves",3
+"lower.glutes","Glutes","lower",2
+"lower.glutes.gluteus_maximus","Gluteus Maximus","lower.glutes",3
+"lower.glutes.gluteus_medius","Gluteus Medius","lower.glutes",3
+"lower.glutes.gluteus_minimus","Gluteus Minimus","lower.glutes",3
+"lower.hamstrings","Hamstrings","lower",2
+"lower.hamstrings.biceps_femoris","Biceps Femoris","lower.hamstrings",3
+"lower.hamstrings.biceps_femoris.long_head","Biceps Femoris Long Head","lower.hamstrings.biceps_femoris",4
+"lower.hamstrings.biceps_femoris.short_head","Biceps Femoris Short Head","lower.hamstrings.biceps_femoris",4
+"lower.hamstrings.semimembranosus","Semimembranosus","lower.hamstrings",3
+"lower.hamstrings.semitendinosus","Semitendinosus","lower.hamstrings",3
+"lower.quads","Quadriceps","lower",2
+"lower.quads.rectus_femoris","Rectus Femoris","lower.quads",3
+"lower.quads.vastus_intermedius","Vastus Intermedius","lower.quads",3
+"lower.quads.vastus_lateralis","Vastus Lateralis","lower.quads",3
+"lower.quads.vastus_medialis","Vastus Medialis","lower.quads",3
+"upper","Upper Body",NULL,1
+"upper.arms","Arms","upper",2
+"upper.arms.biceps_brachii","Biceps Brachii","upper.arms",3
+"upper.arms.biceps_brachii.long_head","Biceps Long Head","upper.arms.biceps_brachii",4
+"upper.arms.biceps_brachii.short_head","Biceps Short Head","upper.arms.biceps_brachii",4
+"upper.arms.brachialis","Brachialis","upper.arms",3
+"upper.arms.brachioradialis","Brachioradialis","upper.arms",3
+"upper.arms.triceps_brachii","Triceps Brachii","upper.arms",3
+"upper.arms.triceps_brachii.lateral_head","Triceps Lateral Head","upper.arms.triceps_brachii",4
+"upper.arms.triceps_brachii.long_head","Triceps Long Head","upper.arms.triceps_brachii",4
+"upper.arms.triceps_brachii.medial_head","Triceps Medial Head","upper.arms.triceps_brachii",4
+"upper.back","Back","upper",2
+"upper.back.latissimus_dorsi","Latissimus Dorsi","upper.back",3
+"upper.back.levator_scapulae","Levator Scapulae","upper.back",3
+"upper.back.rhomboids","Rhomboids","upper.back",3
+"upper.back.teres_major","Teres Major","upper.back",3
+"upper.back.trapezius","Trapezius","upper.back",3
+"upper.back.trapezius.lower","Trapezius Lower","upper.back.trapezius",4
+"upper.back.trapezius.middle","Trapezius Middle","upper.back.trapezius",4
+"upper.back.trapezius.upper","Trapezius Upper","upper.back.trapezius",4
+"upper.chest","Chest","upper",2
+"upper.chest.pectoralis_major","Pectoralis Major","upper.chest",3
+"upper.chest.pectoralis_major.abdominal","Pec Major (Abdominal)","upper.chest.pectoralis_major",4
+"upper.chest.pectoralis_major.clavicular","Pec Major (Clavicular)","upper.chest.pectoralis_major",4
+"upper.chest.pectoralis_major.sternal","Pec Major (Sternal)","upper.chest.pectoralis_major",4
+"upper.chest.pectoralis_minor","Pectoralis Minor","upper.chest",3
+"upper.chest.serratus_anterior","Serratus Anterior","upper.chest",3
+"upper.forearms","Forearms","upper",2
+"upper.forearms.extensors","Wrist Extensors","upper.forearms",3
+"upper.forearms.flexors","Wrist Flexors","upper.forearms",3
+"upper.forearms.pronator_teres","Pronator Teres","upper.forearms",3
+"upper.forearms.supinator","Supinator","upper.forearms",3
+"upper.shoulders","Shoulders","upper",2
+"upper.shoulders.deltoid","Deltoid","upper.shoulders",3
+"upper.shoulders.deltoid.anterior","Anterior Deltoid","upper.shoulders.deltoid",4
+"upper.shoulders.deltoid.lateral","Lateral Deltoid","upper.shoulders.deltoid",4
+"upper.shoulders.deltoid.posterior","Posterior Deltoid","upper.shoulders.deltoid",4
+"upper.shoulders.rotator_cuff","Rotator Cuff","upper.shoulders",3
+"upper.shoulders.rotator_cuff.infraspinatus","Infraspinatus","upper.shoulders.rotator_cuff",4
+"upper.shoulders.rotator_cuff.subscapularis","Subscapularis","upper.shoulders.rotator_cuff",4
+"upper.shoulders.rotator_cuff.supraspinatus","Supraspinatus","upper.shoulders.rotator_cuff",4
+"upper.shoulders.rotator_cuff.teres_minor","Teres Minor","upper.shoulders.rotator_cuff",4
+"upper.traps","Trapezius","upper",2

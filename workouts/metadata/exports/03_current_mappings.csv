@@ -1,0 +1,429 @@
+"name","variation","target_path","contribution"
+"Ab Rollout","","core",1.0
+"Ab Rollout","","core.abs",1.0
+"Ab Rollout","","core.abs.rectus_abdominis",0.60
+"Ab Rollout","","upper",1.0
+"Ab Rollout","","upper.back",1.0
+"Ab Rollout","","upper.back.latissimus_dorsi",0.20
+"Ab Rollout","","upper.chest",1.0
+"Ab Rollout","","upper.chest.serratus_anterior",0.20
+"Bench Dips","","upper",1.0
+"Bench Dips","","upper.arms",1.0
+"Bench Dips","","upper.arms.triceps_brachii",1.0
+"Bench Dips","","upper.arms.triceps_brachii.lateral_head",0.40
+"Bench Dips","","upper.arms.triceps_brachii.long_head",0.40
+"Bench Dips","","upper.arms.triceps_brachii.medial_head",0.20
+"Bench Dips","Feet Elevated","upper",1.0
+"Bench Dips","Feet Elevated","upper.arms",1.0
+"Bench Dips","Feet Elevated","upper.arms.triceps_brachii",1.0
+"Bench Dips","Feet Elevated","upper.arms.triceps_brachii.lateral_head",0.40
+"Bench Dips","Feet Elevated","upper.arms.triceps_brachii.long_head",0.40
+"Bench Dips","Feet Elevated","upper.arms.triceps_brachii.medial_head",0.20
+"Bench Press","","upper",1.0
+"Bench Press","","upper.arms",1.0
+"Bench Press","","upper.arms.triceps_brachii",1.0
+"Bench Press","","upper.arms.triceps_brachii.long_head",0.25
+"Bench Press","","upper.chest",1.0
+"Bench Press","","upper.chest.pectoralis_major",1.0
+"Bench Press","","upper.chest.pectoralis_major.sternal",0.60
+"Bench Press","","upper.shoulders",1.0
+"Bench Press","","upper.shoulders.deltoid",1.0
+"Bench Press","","upper.shoulders.deltoid.anterior",0.15
+"Bench Press","Flat","upper",1.0
+"Bench Press","Flat","upper.arms",1.0
+"Bench Press","Flat","upper.arms.triceps_brachii",1.0
+"Bench Press","Flat","upper.arms.triceps_brachii.long_head",0.25
+"Bench Press","Flat","upper.chest",1.0
+"Bench Press","Flat","upper.chest.pectoralis_major",1.0
+"Bench Press","Flat","upper.chest.pectoralis_major.sternal",0.60
+"Bench Press","Flat","upper.shoulders",1.0
+"Bench Press","Flat","upper.shoulders.deltoid",1.0
+"Bench Press","Flat","upper.shoulders.deltoid.anterior",0.15
+"Bench Press","Incline","upper",1.0
+"Bench Press","Incline","upper.arms",1.0
+"Bench Press","Incline","upper.arms.triceps_brachii",1.0
+"Bench Press","Incline","upper.arms.triceps_brachii.long_head",0.20
+"Bench Press","Incline","upper.chest",1.0
+"Bench Press","Incline","upper.chest.pectoralis_major",1.0
+"Bench Press","Incline","upper.chest.pectoralis_major.clavicular",0.50
+"Bench Press","Incline","upper.shoulders",1.0
+"Bench Press","Incline","upper.shoulders.deltoid",1.0
+"Bench Press","Incline","upper.shoulders.deltoid.anterior",0.30
+"Bicep Curl","","upper",1.0
+"Bicep Curl","","upper.arms",1.0
+"Bicep Curl","","upper.arms.biceps_brachii",1.0
+"Bicep Curl","","upper.arms.biceps_brachii.long_head",0.50
+"Bicep Curl","","upper.arms.biceps_brachii.short_head",0.50
+"Bicep Curl","Hammer","upper",1.0
+"Bicep Curl","Hammer","upper.arms",1.0
+"Bicep Curl","Hammer","upper.arms.biceps_brachii",1.0
+"Bicep Curl","Hammer","upper.arms.biceps_brachii.long_head",0.10
+"Bicep Curl","Hammer","upper.arms.brachialis",0.60
+"Bicep Curl","Hammer","upper.arms.brachioradialis",0.30
+"Bicep Curl","Hammer Incline","upper",1.0
+"Bicep Curl","Hammer Incline","upper.arms",1.0
+"Bicep Curl","Hammer Incline","upper.arms.biceps_brachii",1.0
+"Bicep Curl","Hammer Incline","upper.arms.biceps_brachii.long_head",0.40
+"Bicep Curl","Hammer Incline","upper.arms.brachialis",0.50
+"Bicep Curl","Hammer Incline","upper.arms.brachioradialis",0.10
+"Bicep Curl","Incline","upper",1.0
+"Bicep Curl","Incline","upper.arms",1.0
+"Bicep Curl","Incline","upper.arms.biceps_brachii",1.0
+"Bicep Curl","Incline","upper.arms.biceps_brachii.long_head",0.70
+"Bicep Curl","Incline","upper.arms.biceps_brachii.short_head",0.30
+"Bicep Curl","Zottman","upper",1.0
+"Bicep Curl","Zottman","upper.arms",1.0
+"Bicep Curl","Zottman","upper.arms.biceps_brachii",1.0
+"Bicep Curl","Zottman","upper.arms.biceps_brachii.long_head",0.30
+"Bicep Curl","Zottman","upper.arms.biceps_brachii.short_head",0.20
+"Bicep Curl","Zottman","upper.arms.brachioradialis",0.50
+"Bird dog plank","","core",1.0
+"Bird dog plank","","core.deep",1.0
+"Bird dog plank","","core.deep.multifidus",0.50
+"Bird dog plank","","core.deep.quadratus_lumborum",0.20
+"Bird dog plank","","core.spinal_erectors",1.0
+"Bird dog plank","","core.spinal_erectors.lumbar",0.30
+"Bird dog plank","","lower",1.0
+"Bird dog plank","","lower.glutes",1.0
+"Bird dog plank","","lower.glutes.gluteus_maximus",0.20
+"Bulgarian Split Squat","","core",0.2
+"Bulgarian Split Squat","","lower",1.0
+"Bulgarian Split Squat","","lower.adductors",0.3
+"Bulgarian Split Squat","","lower.glutes",0.8
+"Bulgarian Split Squat","","lower.glutes.gluteus_maximus",0.6
+"Bulgarian Split Squat","","lower.glutes.gluteus_medius",0.2
+"Bulgarian Split Squat","","lower.hamstrings",0.4
+"Bulgarian Split Squat","","lower.quads",1.0
+"Bulgarian Split Squat","","lower.quads.rectus_femoris",0.2
+"Bulgarian Split Squat","","lower.quads.vastus_lateralis",0.4
+"Bulgarian Split Squat","","lower.quads.vastus_medialis",0.4
+"Chest Fly","","upper",1.0
+"Chest Fly","","upper.chest",1.0
+"Chest Fly","","upper.chest.pectoralis_major",1.0
+"Chest Fly","","upper.chest.pectoralis_major.sternal",0.85
+"Chest Fly","","upper.shoulders",1.0
+"Chest Fly","","upper.shoulders.deltoid",1.0
+"Chest Fly","","upper.shoulders.deltoid.anterior",0.15
+"Chest Fly","Flat","upper",1.0
+"Chest Fly","Flat","upper.chest",1.0
+"Chest Fly","Flat","upper.chest.pectoralis_major",1.0
+"Chest Fly","Flat","upper.chest.pectoralis_major.sternal",0.85
+"Chest Fly","Flat","upper.shoulders",1.0
+"Chest Fly","Flat","upper.shoulders.deltoid",1.0
+"Chest Fly","Flat","upper.shoulders.deltoid.anterior",0.15
+"Crunch","","core",1.0
+"Crunch","","core.abs",1.0
+"Crunch","","core.abs.rectus_abdominis",1.0
+"Db Kickbacks","","upper",1.0
+"Db Kickbacks","","upper.arms",1.0
+"Db Kickbacks","","upper.arms.triceps_brachii",1.0
+"Db Kickbacks","","upper.arms.triceps_brachii.lateral_head",0.40
+"Db Kickbacks","","upper.arms.triceps_brachii.long_head",0.40
+"Db Kickbacks","","upper.arms.triceps_brachii.medial_head",0.20
+"Dead Bug","","core",1.0
+"Dead Bug","","core.abs",1.0
+"Dead Bug","","core.abs.rectus_abdominis",0.20
+"Dead Bug","","core.deep",1.0
+"Dead Bug","","core.deep.transversus_abdominis",0.60
+"Dead Bug","","core.spinal_erectors",1.0
+"Dead Bug","","core.spinal_erectors.lumbar",0.20
+"Fingerboard Hang","","upper",1.0
+"Fingerboard Hang","","upper.forearms",1.0
+"Fingerboard Hang","","upper.forearms.extensors",0.10
+"Fingerboard Hang","","upper.forearms.flexors",0.90
+"Fire Hydrant","","lower",1.0
+"Fire Hydrant","","lower.glutes",1.0
+"Fire Hydrant","","lower.glutes.gluteus_medius",0.70
+"Fire Hydrant","","lower.glutes.gluteus_minimus",0.30
+"Front Raise","","upper",1.0
+"Front Raise","","upper.chest",1.0
+"Front Raise","","upper.chest.pectoralis_major",1.0
+"Front Raise","","upper.chest.pectoralis_major.clavicular",0.10
+"Front Raise","","upper.shoulders",1.0
+"Front Raise","","upper.shoulders.deltoid",1.0
+"Front Raise","","upper.shoulders.deltoid.anterior",0.90
+"Glute Bridge","","lower",1.0
+"Glute Bridge","","lower.glutes",1.0
+"Glute Bridge","","lower.glutes.gluteus_maximus",0.80
+"Glute Bridge","","lower.hamstrings",1.0
+"Glute Bridge","","lower.hamstrings.semitendinosus",0.20
+"Hamstring Floor Curl","","core",0.2
+"Hamstring Floor Curl","","lower",1.0
+"Hamstring Floor Curl","","lower.calves",0.2
+"Hamstring Floor Curl","","lower.glutes",0.3
+"Hamstring Floor Curl","","lower.hamstrings",1.0
+"Hamstring Floor Curl","","lower.hamstrings.biceps_femoris.long_head",0.5
+"Hamstring Floor Curl","","lower.hamstrings.semimembranosus",0.2
+"Hamstring Floor Curl","","lower.hamstrings.semitendinosus",0.3
+"Hanging Leg Raise","","core",1.0
+"Hanging Leg Raise","","core.abs",1.0
+"Hanging Leg Raise","","core.abs.rectus_abdominis",0.60
+"Hanging Leg Raise","","core.deep",1.0
+"Hanging Leg Raise","","core.deep.transversus_abdominis",0.40
+"Hanging Leg Raise","","core.hip_flexors",1.0
+"Heel Drop","","lower",1.0
+"Heel Drop","","lower.calves",1.0
+"Heel Drop","","lower.calves.gastrocnemius",1.0
+"Heel Drop","","lower.calves.gastrocnemius.lateral",0.35
+"Heel Drop","","lower.calves.gastrocnemius.medial",0.35
+"Heel Drop","","lower.calves.soleus",0.30
+"Heel Drop","Bent Knee","lower",1.0
+"Heel Drop","Bent Knee","lower.calves",1.0
+"Heel Drop","Bent Knee","lower.calves.gastrocnemius",1.0
+"Heel Drop","Bent Knee","lower.calves.gastrocnemius.lateral",0.10
+"Heel Drop","Bent Knee","lower.calves.gastrocnemius.medial",0.10
+"Heel Drop","Bent Knee","lower.calves.soleus",0.80
+"Heel Drop","Bent Knee Single Leg","lower",1.0
+"Heel Drop","Bent Knee Single Leg","lower.calves",1.0
+"Heel Drop","Bent Knee Single Leg","lower.calves.gastrocnemius",1.0
+"Heel Drop","Bent Knee Single Leg","lower.calves.gastrocnemius.lateral",0.10
+"Heel Drop","Bent Knee Single Leg","lower.calves.gastrocnemius.medial",0.10
+"Heel Drop","Bent Knee Single Leg","lower.calves.soleus",0.80
+"Heel Drop","Single Leg","lower",1.0
+"Heel Drop","Single Leg","lower.calves",1.0
+"Heel Drop","Single Leg","lower.calves.gastrocnemius",1.0
+"Heel Drop","Single Leg","lower.calves.gastrocnemius.lateral",0.35
+"Heel Drop","Single Leg","lower.calves.gastrocnemius.medial",0.35
+"Heel Drop","Single Leg","lower.calves.soleus",0.30
+"Hip Rotation Stretch","","lower",1.0
+"Hip Rotation Stretch","","lower.glutes",1.0
+"Hip Rotation Stretch","","lower.glutes.gluteus_medius",0.60
+"Hip Rotation Stretch","","lower.glutes.gluteus_minimus",0.40
+"Hip Thrust","","lower",1.0
+"Hip Thrust","","lower.glutes",1.0
+"Hip Thrust","","lower.glutes.gluteus_maximus",0.70
+"Hip Thrust","","lower.hamstrings",1.0
+"Hip Thrust","","lower.hamstrings.semitendinosus",0.20
+"Hip Thrust","","lower.quads",1.0
+"Hip Thrust","","lower.quads.rectus_femoris",0.10
+"Hollow Hold","","core",1.0
+"Hollow Hold","","core.abs",1.0
+"Hollow Hold","","core.abs.rectus_abdominis",0.40
+"Hollow Hold","","core.deep",1.0
+"Hollow Hold","","core.deep.transversus_abdominis",0.40
+"Hollow Hold","","core.obliques",1.0
+"Hollow Hold","","core.obliques.internal",0.20
+"Incline Leg Raise","","core",1.0
+"Incline Leg Raise","","core.hip_flexors",0.60
+"Kickbacks","","upper",1.0
+"Kickbacks","","upper.arms",1.0
+"Kickbacks","","upper.arms.triceps_brachii",1.0
+"Kickbacks","","upper.arms.triceps_brachii.lateral_head",0.40
+"Kickbacks","","upper.arms.triceps_brachii.long_head",0.40
+"Kickbacks","","upper.arms.triceps_brachii.medial_head",0.20
+"Lateral Raise","","upper",1.0
+"Lateral Raise","","upper.shoulders",1.0
+"Lateral Raise","","upper.shoulders.deltoid",1.0
+"Lateral Raise","","upper.shoulders.deltoid.lateral",0.80
+"Lateral Raise","","upper.shoulders.rotator_cuff",1.0
+"Lateral Raise","","upper.shoulders.rotator_cuff.supraspinatus",0.20
+"Lat Pullover","","upper",1.0
+"Lat Pullover","","upper.arms",1.0
+"Lat Pullover","","upper.arms.triceps_brachii",1.0
+"Lat Pullover","","upper.arms.triceps_brachii.long_head",0.20
+"Lat Pullover","","upper.back",1.0
+"Lat Pullover","","upper.back.latissimus_dorsi",0.80
+"Leg Raise + Reverse Crunch","","core",1.0
+"Leg Raise + Reverse Crunch","","core.abs",1.0
+"Leg Raise + Reverse Crunch","","core.abs.rectus_abdominis",0.70
+"Leg Raise + Reverse Crunch","","core.deep",1.0
+"Leg Raise + Reverse Crunch","","core.deep.transversus_abdominis",0.30
+"Leg Raise + Reverse Crunch","","core.hip_flexors",1.0
+"Leg raises","","core",1.0
+"Leg raises","","core.abs",1.0
+"Leg raises","","core.abs.rectus_abdominis",0.60
+"Leg raises","","core.deep",1.0
+"Leg raises","","core.deep.transversus_abdominis",0.40
+"Leg raises","","core.hip_flexors",1.0
+"Leg raises","Incline","core",1.0
+"Leg raises","Incline","core.abs",1.0
+"Leg raises","Incline","core.abs.rectus_abdominis",0.60
+"Leg raises","Incline","core.deep",1.0
+"Leg raises","Incline","core.deep.transversus_abdominis",0.40
+"Leg raises","Incline","core.hip_flexors",1.0
+"Lying Shoulder External Rotation","","upper",1.0
+"Lying Shoulder External Rotation","","upper.shoulders",1.0
+"Lying Shoulder External Rotation","","upper.shoulders.rotator_cuff",1.0
+"Lying Shoulder External Rotation","","upper.shoulders.rotator_cuff.infraspinatus",0.70
+"Lying Shoulder External Rotation","","upper.shoulders.rotator_cuff.teres_minor",0.30
+"Lying Shoulder Internal Rotation","","upper",1.0
+"Lying Shoulder Internal Rotation","","upper.shoulders",1.0
+"Lying Shoulder Internal Rotation","","upper.shoulders.rotator_cuff",1.0
+"Lying Shoulder Internal Rotation","","upper.shoulders.rotator_cuff.subscapularis",1.0
+"One-Arm Row","","upper",1.0
+"One-Arm Row","","upper.back",1.0
+"One-Arm Row","","upper.back.latissimus_dorsi",0.60
+"One-Arm Row","","upper.back.rhomboids",0.20
+"One-Arm Row","","upper.shoulders",1.0
+"One-Arm Row","","upper.shoulders.deltoid",1.0
+"One-Arm Row","","upper.shoulders.deltoid.posterior",0.20
+"One-Arm Row","Pronated","upper",1.0
+"One-Arm Row","Pronated","upper.back",1.0
+"One-Arm Row","Pronated","upper.back.latissimus_dorsi",0.50
+"One-Arm Row","Pronated","upper.back.rhomboids",0.30
+"One-Arm Row","Pronated","upper.back.trapezius",1.0
+"One-Arm Row","Pronated","upper.back.trapezius.middle",0.20
+"Pelvic Tilt","","core",1.0
+"Pelvic Tilt","","core.deep",1.0
+"Pelvic Tilt","","core.deep.multifidus",0.30
+"Pelvic Tilt","","core.deep.transversus_abdominis",0.70
+"Plank","","core",1.0
+"Plank","","core.abs",1.0
+"Plank","","core.abs.rectus_abdominis",0.25
+"Plank","","core.deep",1.0
+"Plank","","core.deep.transversus_abdominis",0.50
+"Plank","","core.obliques",1.0
+"Plank","","core.obliques.external",0.25
+"Prone Y Raises","","core",1.0
+"Prone Y Raises","","core.spinal_erectors",1.0
+"Prone Y Raises","","core.spinal_erectors.thoracic",0.70
+"Pull-up","","upper",1.0
+"Pull-up","","upper.arms",1.0
+"Pull-up","","upper.arms.biceps_brachii",1.0
+"Pull-up","","upper.arms.biceps_brachii.long_head",0.25
+"Pull-up","","upper.back",1.0
+"Pull-up","","upper.back.latissimus_dorsi",0.60
+"Pull-up","","upper.shoulders",1.0
+"Pull-up","","upper.shoulders.deltoid",1.0
+"Pull-up","","upper.shoulders.deltoid.posterior",0.15
+"Push-up","","upper",1.0
+"Push-up","","upper.arms",1.0
+"Push-up","","upper.arms.triceps_brachii",1.0
+"Push-up","","upper.arms.triceps_brachii.lateral_head",0.25
+"Push-up","","upper.chest",1.0
+"Push-up","","upper.chest.pectoralis_major",1.0
+"Push-up","","upper.chest.pectoralis_major.sternal",0.60
+"Push-up","","upper.shoulders",1.0
+"Push-up","","upper.shoulders.deltoid",1.0
+"Push-up","","upper.shoulders.deltoid.anterior",0.15
+"RDL","","lower",1.0
+"RDL","","lower.glutes",1.0
+"RDL","","lower.glutes.gluteus_maximus",0.10
+"RDL","","lower.hamstrings",1.0
+"RDL","","lower.hamstrings.biceps_femoris",1.0
+"RDL","","lower.hamstrings.biceps_femoris.long_head",0.30
+"RDL","","lower.hamstrings.semimembranosus",0.30
+"RDL","","lower.hamstrings.semitendinosus",0.30
+"Rear Delt Row","","upper",1.0
+"Rear Delt Row","","upper.back",1.0
+"Rear Delt Row","","upper.back.rhomboids",0.40
+"Rear Delt Row","","upper.shoulders",1.0
+"Rear Delt Row","","upper.shoulders.deltoid",1.0
+"Rear Delt Row","","upper.shoulders.deltoid.posterior",0.60
+"Reverse Crunch","","core",1.0
+"Reverse Crunch","","core.abs",1.0
+"Reverse Crunch","","core.abs.rectus_abdominis",0.80
+"Reverse Crunch","","core.deep",1.0
+"Reverse Crunch","","core.deep.transversus_abdominis",0.20
+"Reverse Crunch","","core.hip_flexors",1.0
+"Reverse Curl","","upper",1.0
+"Reverse Curl","","upper.forearms",1.0
+"Reverse Curl","","upper.forearms.extensors",1.0
+"Reverse Fly","","upper",1.0
+"Reverse Fly","","upper.back",1.0
+"Reverse Fly","","upper.back.rhomboids",0.40
+"Reverse Fly","","upper.shoulders",1.0
+"Reverse Fly","","upper.shoulders.deltoid",1.0
+"Reverse Fly","","upper.shoulders.deltoid.posterior",0.60
+"Reverse wrist curl","","upper",1.0
+"Reverse wrist curl","","upper.forearms",1.0
+"Reverse wrist curl","","upper.forearms.extensors",1.0
+"Russian Twist","","core",1.0
+"Russian Twist","","core.obliques",1.0
+"Russian Twist","","core.obliques.external",0.60
+"Russian Twist","","core.obliques.internal",0.40
+"Scapular pull-up","","upper",1.0
+"Scapular pull-up","","upper.back",1.0
+"Scapular pull-up","","upper.back.trapezius",1.0
+"Scapular pull-up","","upper.back.trapezius.lower",0.60
+"Scapular pull-up","","upper.chest",1.0
+"Scapular pull-up","","upper.chest.serratus_anterior",0.40
+"Scapular row","","upper",1.0
+"Scapular row","","upper.back",1.0
+"Scapular row","","upper.back.rhomboids",0.50
+"Scapular row","","upper.back.trapezius",1.0
+"Scapular row","","upper.back.trapezius.middle",0.50
+"Seated Forearm Curl","","upper",1.0
+"Seated Forearm Curl","","upper.forearms",1.0
+"Seated Forearm Curl","","upper.forearms.flexors",1.0
+"Shoulder Press","","upper",1.0
+"Shoulder Press","","upper.arms",1.0
+"Shoulder Press","","upper.arms.triceps_brachii",1.0
+"Shoulder Press","","upper.arms.triceps_brachii.lateral_head",0.20
+"Shoulder Press","","upper.shoulders",1.0
+"Shoulder Press","","upper.shoulders.deltoid",1.0
+"Shoulder Press","","upper.shoulders.deltoid.anterior",0.50
+"Shoulder Press","","upper.shoulders.deltoid.lateral",0.30
+"Shrug","","upper",1.0
+"Shrug","","upper.back",1.0
+"Shrug","","upper.back.trapezius",1.0
+"Shrug","","upper.back.trapezius.middle",0.20
+"Shrug","","upper.back.trapezius.upper",0.80
+"Shrug","","upper.traps",1.0
+"Side Bend","","core",1.0
+"Side Bend","","core.deep",1.0
+"Side Bend","","core.deep.quadratus_lumborum",0.80
+"Side-Lying Hip Abduction","","lower",1.0
+"Side-Lying Hip Abduction","","lower.glutes",1.0
+"Side-Lying Hip Abduction","","lower.glutes.gluteus_medius",0.70
+"Side-Lying Hip Abduction","","lower.glutes.gluteus_minimus",0.30
+"Side-Lying Hip Abduction","Bent Knee","lower",1.0
+"Side-Lying Hip Abduction","Bent Knee","lower.glutes",1.0
+"Side-Lying Hip Abduction","Bent Knee","lower.glutes.gluteus_medius",0.70
+"Side-Lying Hip Abduction","Bent Knee","lower.glutes.gluteus_minimus",0.30
+"Side Plank with Hip Drops","","core",1.0
+"Side Plank with Hip Drops","","core.deep",1.0
+"Side Plank with Hip Drops","","core.deep.quadratus_lumborum",0.60
+"Side Plank with Hip Drops","","core.deep.transversus_abdominis",0.20
+"Side Plank with Hip Drops","","core.obliques",1.0
+"Side Plank with Hip Drops","","core.obliques.external",0.50
+"Side Plank with Hip Drops","","core.obliques.internal",0.30
+"Side Plank with Hip Drops","Elevated","core",1.0
+"Side Plank with Hip Drops","Elevated","core.deep",1.0
+"Side Plank with Hip Drops","Elevated","core.deep.quadratus_lumborum",0.60
+"Side Plank with Hip Drops","Elevated","core.deep.transversus_abdominis",0.20
+"Side Plank with Hip Drops","Elevated","core.obliques",1.0
+"Side Plank with Hip Drops","Elevated","core.obliques.external",0.50
+"Side Plank with Hip Drops","Elevated","core.obliques.internal",0.30
+"Sit-Up","","core",1.0
+"Sit-Up","","core.abs",1.0
+"Sit-Up","","core.abs.rectus_abdominis",1.0
+"Sit-Up","","core.hip_flexors",0.30
+"Sit-Up","Decline","core",1.0
+"Sit-Up","Decline","core.abs",1.0
+"Sit-Up","Decline","core.abs.rectus_abdominis",1.0
+"Sit-Up","Decline","core.hip_flexors",0.40
+"Sit-Up","Incline","core",1.0
+"Sit-Up","Incline","core.abs",1.0
+"Sit-Up","Incline","core.abs.rectus_abdominis",1.0
+"Sit-Up","Incline","core.hip_flexors",0.40
+"Step back Lunge","","lower",1.0
+"Step back Lunge","","lower.glutes",1.0
+"Step back Lunge","","lower.glutes.gluteus_maximus",0.20
+"Step back Lunge","","lower.hamstrings",1.0
+"Step back Lunge","","lower.hamstrings.semitendinosus",0.10
+"Step back Lunge","","lower.quads",1.0
+"Step back Lunge","","lower.quads.rectus_femoris",0.30
+"Step back Lunge","","lower.quads.vastus_lateralis",0.20
+"Step back Lunge","","lower.quads.vastus_medialis",0.20
+"Straight Leg Stretch","","lower",1.0
+"Straight Leg Stretch","","lower.hamstrings",1.0
+"Supine Pelvic Tilts","","core",1.0
+"Supine Pelvic Tilts","","core.deep",1.0
+"Supine Pelvic Tilts","","core.deep.multifidus",0.30
+"Supine Pelvic Tilts","","core.deep.transversus_abdominis",0.70
+"Wall/Floor Glides","","core",1.0
+"Wall/Floor Glides","","core.spinal_erectors",1.0
+"Wall/Floor Glides","","core.spinal_erectors.thoracic",0.30
+"Wall/Floor Glides","","upper",1.0
+"Wall/Floor Glides","","upper.chest",1.0
+"Wall/Floor Glides","","upper.chest.serratus_anterior",0.50
+"Wall/Floor Glides","","upper.shoulders",1.0
+"Wall/Floor Glides","","upper.shoulders.rotator_cuff",1.0
+"Wall/Floor Glides","","upper.shoulders.rotator_cuff.infraspinatus",0.25
+"Wall/Floor Glides","","upper.shoulders.rotator_cuff.subscapularis",0.25
+"Wrist Curl","","upper",1.0
+"Wrist Curl","","upper.arms.brachioradialis",0.1
+"Wrist Curl","","upper.forearms",1.0
+"Wrist Curl","","upper.forearms.flexors",0.8
+"Wrist Curl","","upper.forearms.pronator_teres",0.1
