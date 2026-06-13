@@ -28,6 +28,12 @@ QUALITY_SUFFIX_RE = re.compile(
     r"\s+(4K|FHD|HD|SD|UHD)\b(?=\s*\(|\s*$)",
     re.IGNORECASE,
 )
+FIFA_GROUP_PREFIX_RE = re.compile(r"^FIFA\s+(.+)$", re.IGNORECASE)
+FIFA_NAME_PREFIX_RE = re.compile(r"^FIFA\s+(?:WK26-\s*)?", re.IGNORECASE)
+NAME_COUNTRY_SUFFIX_RE = re.compile(
+    r"\s*\(([A-Z]{2,3}|Arg)\)\s*$", re.IGNORECASE
+)
+COUNTRY_SUFFIX_ALIASES = {"ARG": "AR"}
 
 
 @dataclass(frozen=True)
@@ -191,6 +197,59 @@ def normalize_channel_name(
     return formatted or text
 
 
+def _parse_name_country_suffix(name: str) -> tuple[str | None, str]:
+    match = NAME_COUNTRY_SUFFIX_RE.search(name)
+    if not match:
+        return None, name
+    raw = match.group(1).upper()
+    country = COUNTRY_SUFFIX_ALIASES.get(raw, raw)
+    return country, name[: match.start()].strip()
+
+
+def normalize_fifa_group_title(
+    group_title: str, aliases: dict[str, str]
+) -> str:
+    country = extract_country(group_title, aliases)
+    if country:
+        return normalize_group_title_with_aliases(group_title, country, aliases)
+
+    gt = group_title.strip()
+    fifa_match = FIFA_GROUP_PREFIX_RE.match(gt)
+    if fifa_match:
+        rest = re.sub(r"\s+", " ", fifa_match.group(1)).strip()
+        return f"FIFA | {rest}" if rest else "FIFA"
+    return gt
+
+
+def normalize_fifa_channel_name(
+    name: str, group_title: str, aliases: dict[str, str]
+) -> str:
+    text = re.sub(r"\s+", " ", name.strip())
+    if not text:
+        return text
+
+    group_country = extract_country(group_title, aliases)
+    text = FIFA_NAME_PREFIX_RE.sub("", text).strip()
+    name_country, text = _parse_name_country_suffix(text)
+
+    country = name_country or group_country or "FIFA"
+    if group_country and name_country and not _country_codes_match(
+        group_country, name_country, aliases
+    ):
+        country = name_country
+
+    quality_prefix, text = _parse_quality_prefix(text)
+    text, quality_suffix = _parse_quality_suffix(text)
+    quality = quality_prefix or quality_suffix
+    name_part = re.sub(r"\s+", " ", text).strip()
+
+    if not any((country, name_part, quality)):
+        return name
+
+    formatted = _format_channel_name(country, name_part, quality)
+    return formatted or name
+
+
 def parse_extinf_fields(extinf: str) -> tuple[str, str, str]:
     comma = extinf.find(",")
     display = extinf[comma + 1 :].strip() if comma != -1 else ""
@@ -300,23 +359,31 @@ class RuleEngine:
                 else None
             )
             final_group = group_title
-            if included and playlist.normalize_groups and country in self.config.interested_countries:
-                final_group = normalize_group_title_with_aliases(
-                    group_title,
-                    country,
-                    self.config.country_aliases,
-                )
+            if included and playlist.normalize_groups:
+                if playlist_name == "fifa":
+                    final_group = normalize_fifa_group_title(
+                        group_title, self.config.country_aliases
+                    )
+                elif country in self.config.interested_countries:
+                    final_group = normalize_group_title_with_aliases(
+                        group_title,
+                        country,
+                        self.config.country_aliases,
+                    )
 
             final_name = display_name or stream_name
-            if (
-                included
-                and playlist.normalize_names
-                and country in self.config.interested_countries
-            ):
+            if included and playlist.normalize_names:
                 source_name = stream_name or display_name
-                final_name = normalize_channel_name(
-                    source_name, country, self.config.country_aliases
-                )
+                if playlist_name == "fifa":
+                    final_name = normalize_fifa_channel_name(
+                        source_name,
+                        group_title,
+                        self.config.country_aliases,
+                    )
+                elif country in self.config.interested_countries:
+                    final_name = normalize_channel_name(
+                        source_name, country, self.config.country_aliases
+                    )
 
             output_lines: tuple[str, ...] = ()
             if included:

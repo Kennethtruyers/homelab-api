@@ -221,8 +221,8 @@ playlists:
 
   fifa:
     description: FIFA World Cup and FIFA+ channels
-    normalize_groups: false
-    normalize_names: false
+    normalize_groups: true
+    normalize_names: true
     default: exclude
     rules:
       - name: fifa groups
