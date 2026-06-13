@@ -1,6 +1,9 @@
 # IPTV playlist proxy rules — first match wins.
 # default: exclude  →  streams that match no rule are dropped
 # default: include →  streams that match no rule are kept (use a final catch-all exclude)
+#
+# Event pattern (keep in sync across playlists):
+# (?i)(EVENTOS?|PPV|REPLAY|event only|BACKUP|LIVE\s*EVENT|DAZN\s*(PPV|EVENT|MLB|MLS|NBA)|FIGHT\s*NIGHT|FOOTBALL.*EVENT|FORMULA\s*1\s*EVENT|COMBATE\s*EVENT|MAX\s*EVENT|RALLY\s*PPV|HUB\s*PREMIER\s*PPV|VIAPLAY\s*\(BACKUP)
 
 countries:
   interested: [BE, NL, ES, EN]
@@ -11,8 +14,19 @@ playlists:
   live:
     description: Linear live TV for BE / NL / ES / EN
     normalize_groups: true
+    normalize_names: true
     default: exclude
     rules:
+      - name: events (group)
+        action: exclude
+        field: group
+        pattern: '(?i)(EVENTOS?|PPV|REPLAY|event only|BACKUP|LIVE\s*EVENT|DAZN\s*(PPV|EVENT|MLB|MLS|NBA)|FIGHT\s*NIGHT|FOOTBALL.*EVENT|FORMULA\s*1\s*EVENT|COMBATE\s*EVENT|MAX\s*EVENT|RALLY\s*PPV|HUB\s*PREMIER\s*PPV|VIAPLAY\s*\(BACKUP)'
+
+      - name: events (name)
+        action: exclude
+        field: name
+        pattern: '(?i)(LIVE\s*EVENT|SOLO\s*EVENTOS|2098-12-31|DAZN\s*EVENTOS?\s+\d)'
+
       - name: pluto vod
         action: exclude
         field: group
@@ -48,11 +62,6 @@ playlists:
         field: name
         pattern: '\((MX|CA|US|AR|BR|CO|CL|PE|VE|EC)\)'
 
-      - name: placeholder events
-        action: exclude
-        field: name
-        pattern: '2098-12-31'
-
       - name: pluto in stream name
         action: exclude
         field: name
@@ -63,12 +72,6 @@ playlists:
         field: name
         pattern: '(?i)^24/7 [A-Z]'
 
-      # Optional: drop event / replay / backup groups
-      - name: event buckets
-        action: exclude
-        field: group
-        pattern: '(?i)(EVENTOS?|PPV|REPLAY|event only|BACKUP)'
-
       - name: eu live interested countries
         action: include
         field: group
@@ -77,8 +80,19 @@ playlists:
   movies:
     description: VOD movies for interested countries
     normalize_groups: true
+    normalize_names: true
     default: exclude
     rules:
+      - name: events (group)
+        action: exclude
+        field: group
+        pattern: '(?i)(EVENTOS?|PPV|REPLAY|event only|BACKUP|LIVE\s*EVENT|DAZN\s*(PPV|EVENT|MLB|MLS|NBA)|FIGHT\s*NIGHT|FOOTBALL.*EVENT|FORMULA\s*1\s*EVENT|COMBATE\s*EVENT|MAX\s*EVENT|RALLY\s*PPV|HUB\s*PREMIER\s*PPV|VIAPLAY\s*\(BACKUP)'
+
+      - name: events (name)
+        action: exclude
+        field: name
+        pattern: '(?i)(LIVE\s*EVENT|SOLO\s*EVENTOS|2098-12-31|DAZN\s*EVENTOS?\s+\d)'
+
       - name: skip live groups
         action: exclude
         field: group
@@ -102,8 +116,19 @@ playlists:
   series:
     description: VOD series for interested countries
     normalize_groups: true
+    normalize_names: true
     default: exclude
     rules:
+      - name: events (group)
+        action: exclude
+        field: group
+        pattern: '(?i)(EVENTOS?|PPV|REPLAY|event only|BACKUP|LIVE\s*EVENT|DAZN\s*(PPV|EVENT|MLB|MLS|NBA)|FIGHT\s*NIGHT|FOOTBALL.*EVENT|FORMULA\s*1\s*EVENT|COMBATE\s*EVENT|MAX\s*EVENT|RALLY\s*PPV|HUB\s*PREMIER\s*PPV|VIAPLAY\s*\(BACKUP)'
+
+      - name: events (name)
+        action: exclude
+        field: name
+        pattern: '(?i)(LIVE\s*EVENT|SOLO\s*EVENTOS|2098-12-31|DAZN\s*EVENTOS?\s+\d)'
+
       - name: skip live groups
         action: exclude
         field: group
@@ -128,3 +153,29 @@ playlists:
         action: include
         field: group
         pattern: '^(BE|NL|ES|EN)\|'
+
+  events:
+    description: Sports and live events for BE / NL / ES / EN
+    normalize_groups: true
+    normalize_names: true
+    default: exclude
+    rules:
+      - name: non-interested eu groups
+        action: exclude
+        field: group
+        pattern: '^EU[\s-]*(?!BE|NL|ES|EN|UK)\b'
+
+      - name: vod country pipe groups
+        action: exclude
+        field: group
+        pattern: '^(BE|NL|ES|EN)\|'
+
+      - name: event groups (eu)
+        action: include
+        field: group
+        pattern: '^EU[\s-]*(BE|NL|ES|EN|UK)\b.*(?i:EVENTOS?|PPV|REPLAY|event only|BACKUP|LIVE\s*EVENT|DAZN\s*(?:PPV|EVENT|MLB|MLS|NBA)|FIGHT\s*NIGHT|FOOTBALL.*EVENT|FORMULA\s*1\s*EVENT|COMBATE\s*EVENT|MAX\s*EVENT|RALLY\s*PPV|HUB\s*PREMIER\s*PPV|VIAPLAY\s*\(BACKUP)'
+
+      - name: event stream names
+        action: include
+        field: name
+        pattern: '(?i)(LIVE\s*EVENT|SOLO\s*EVENTOS|2098-12-31|DAZN\s*EVENTOS?\s+\d)'

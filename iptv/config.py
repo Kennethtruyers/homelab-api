@@ -26,6 +26,7 @@ class PlaylistConfig:
     name: str
     description: str
     normalize_groups: bool
+    normalize_names: bool
     default: DefaultAction
     rules: tuple[Rule, ...]
 
@@ -59,6 +60,11 @@ def load_config(path: Path = RULES_PATH) -> IptvConfig:
             name=name,
             description=str(playlist.get("description", "")),
             normalize_groups=bool(playlist.get("normalize_groups", False)),
+            normalize_names=bool(
+                playlist.get(
+                    "normalize_names", playlist.get("normalize_groups", False)
+                )
+            ),
             default=playlist.get("default", "exclude"),
             rules=rules,
         )

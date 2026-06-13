@@ -39,6 +39,7 @@ Filtered M3U playlists for Dispatcharr. Rules live in `iptv/rules.yaml`.
 - `GET /iptv/live.m3u` — filtered live playlist
 - `GET /iptv/movies.m3u` — filtered movies playlist
 - `GET /iptv/series.m3u` — filtered series playlist
+- `GET /iptv/events.m3u` — filtered sports / PPV / event streams
 - `GET /iptv/{name}.m3u?refresh=true` — bypass upstream cache
 - `GET /iptv/{name}.m3u?include_stats=true` — add `X-IPTV-*` count headers
 - `POST /iptv/cache/invalidate` — clear upstream cache
