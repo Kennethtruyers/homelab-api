@@ -8,6 +8,8 @@ from iptv.config import IptvConfig, PlaylistConfig, Rule, load_config
 
 GROUP_TITLE_RE = re.compile(r'group-title="([^"]*)"')
 TVG_NAME_RE = re.compile(r'tvg-name="([^"]*)"')
+EXTINF_DURATION_RE = re.compile(r"^#EXTINF:([^ ,]+)")
+EXTINF_ATTR_RE = re.compile(r'([\w-]+)="([^"]*)"')
 EU_PREFIX_RE = re.compile(r"^EU[\s-]*([A-Z]{2})\s*(.*)$", re.DOTALL)
 DAY24_PREFIX_RE = re.compile(r"^24/7\|\s*([A-Z]{2})\s*(.*)$", re.DOTALL)
 COUNTRY_PIPE_RE = re.compile(r"^([A-Z]{2,3})\|\s*(.*)$", re.DOTALL)
@@ -22,9 +24,9 @@ class FilterStats:
 
 @dataclass(frozen=True)
 class _ScannedEntry:
-    extinf: str
     url: str
     included: bool
+    output_lines: tuple[str, ...] = ()
 
 
 def extract_country(group_title: str, aliases: dict[str, str]) -> str | None:
@@ -80,10 +82,31 @@ def parse_extinf_fields(extinf: str) -> tuple[str, str]:
     return group_title, stream_name
 
 
-def set_group_title(extinf: str, group_title: str) -> str:
-    if GROUP_TITLE_RE.search(extinf):
-        return GROUP_TITLE_RE.sub(f'group-title="{group_title}"', extinf, count=1)
-    return extinf.replace("#EXTINF:", f'#EXTINF: group-title="{group_title}"', 1)
+def format_m3u_entry(extinf: str, group_title: str) -> tuple[str, ...]:
+    """Emit group-title first and add #EXTGRP for Dispatcharr-compatible parsing."""
+    comma = extinf.find(",")
+    if comma == -1:
+        head, display = extinf, ""
+    else:
+        head, display = extinf[:comma], extinf[comma + 1 :].lstrip()
+
+    duration = "-1"
+    duration_match = EXTINF_DURATION_RE.match(head)
+    if duration_match:
+        duration = duration_match.group(1)
+
+    attrs = [
+        (key, value)
+        for key, value in EXTINF_ATTR_RE.findall(head)
+        if key.lower() != "group-title"
+    ]
+
+    parts = [f"#EXTINF:{duration}", f'group-title="{group_title}"']
+    parts.extend(f'{key}="{value}"' for key, value in attrs)
+    extinf_line = " ".join(parts)
+    if display:
+        extinf_line += f",{display}"
+    return (extinf_line, f"#EXTGRP:{group_title}")
 
 
 class RuleEngine:
@@ -132,19 +155,26 @@ class RuleEngine:
 
             group_title, stream_name = parse_extinf_fields(extinf)
             included = self.evaluate(playlist_name, group_title, stream_name)
+            final_group = group_title
             if included and playlist.normalize_groups:
                 country = extract_country(group_title, self.config.country_aliases)
                 if country in self.config.interested_countries:
-                    extinf = set_group_title(
-                        extinf,
-                        normalize_group_title_with_aliases(
-                            group_title,
-                            country,
-                            self.config.country_aliases,
-                        ),
+                    final_group = normalize_group_title_with_aliases(
+                        group_title,
+                        country,
+                        self.config.country_aliases,
                     )
 
-            yield _ScannedEntry(extinf=extinf, url=line, included=included)
+            output_lines: tuple[str, ...] = ()
+            if included:
+                if final_group:
+                    output_lines = format_m3u_entry(extinf, final_group)
+                else:
+                    output_lines = (extinf,)
+
+            yield _ScannedEntry(
+                url=line, included=included, output_lines=output_lines
+            )
             extinf = None
 
     def iter_filtered_lines(
@@ -153,7 +183,7 @@ class RuleEngine:
         yield "#EXTM3U"
         for entry in self._scan_playlist(lines, playlist_name):
             if entry.included:
-                yield entry.extinf
+                yield from entry.output_lines
                 yield entry.url
 
     def compute_stats(
