@@ -20,6 +20,13 @@ class FilterStats:
     excluded: int
 
 
+@dataclass(frozen=True)
+class _ScannedEntry:
+    extinf: str
+    url: str
+    included: bool
+
+
 def extract_country(group_title: str, aliases: dict[str, str]) -> str | None:
     gt = group_title.strip()
     match = COUNTRY_PIPE_RE.match(gt)
@@ -104,16 +111,13 @@ class RuleEngine:
 
         return playlist.default == "include"
 
-    def filter_lines(
+    def _scan_playlist(
         self, lines: Iterator[str], playlist_name: str
-    ) -> tuple[list[str], FilterStats]:
+    ) -> Iterator[_ScannedEntry]:
         if playlist_name not in self.config.playlists:
             raise KeyError(f"Unknown playlist: {playlist_name}")
 
         playlist = self.config.playlists[playlist_name]
-        output = ["#EXTM3U"]
-        entries_in = 0
-        entries_out = 0
         extinf: str | None = None
 
         for raw_line in lines:
@@ -126,28 +130,43 @@ class RuleEngine:
             if extinf is None or not line or line.startswith("#"):
                 continue
 
-            entries_in += 1
             group_title, stream_name = parse_extinf_fields(extinf)
-            if self.evaluate(playlist_name, group_title, stream_name):
-                if playlist.normalize_groups:
-                    country = extract_country(group_title, self.config.country_aliases)
-                    if country in self.config.interested_countries:
-                        extinf = set_group_title(
-                            extinf,
-                            normalize_group_title_with_aliases(
-                                group_title,
-                                country,
-                                self.config.country_aliases,
-                            ),
-                        )
-                output.append(extinf)
-                output.append(line)
-                entries_out += 1
+            included = self.evaluate(playlist_name, group_title, stream_name)
+            if included and playlist.normalize_groups:
+                country = extract_country(group_title, self.config.country_aliases)
+                if country in self.config.interested_countries:
+                    extinf = set_group_title(
+                        extinf,
+                        normalize_group_title_with_aliases(
+                            group_title,
+                            country,
+                            self.config.country_aliases,
+                        ),
+                    )
+
+            yield _ScannedEntry(extinf=extinf, url=line, included=included)
             extinf = None
 
-        stats = FilterStats(
+    def iter_filtered_lines(
+        self, lines: Iterator[str], playlist_name: str
+    ) -> Iterator[str]:
+        yield "#EXTM3U"
+        for entry in self._scan_playlist(lines, playlist_name):
+            if entry.included:
+                yield entry.extinf
+                yield entry.url
+
+    def compute_stats(
+        self, lines: Iterator[str], playlist_name: str
+    ) -> FilterStats:
+        entries_in = 0
+        entries_out = 0
+        for entry in self._scan_playlist(lines, playlist_name):
+            entries_in += 1
+            if entry.included:
+                entries_out += 1
+        return FilterStats(
             entries_in=entries_in,
             entries_out=entries_out,
             excluded=entries_in - entries_out,
         )
-        return output, stats

@@ -3,10 +3,10 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-import requests
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import StreamingResponse
 
-from iptv.cache import upstream_cache
+from iptv.cache import UpstreamFetchError, upstream_cache
 from iptv.config import RULES_PATH, load_config
 from iptv.engine import RuleEngine
 
@@ -39,6 +39,19 @@ async def invalidate_cache():
     return {"status": "ok"}
 
 
+@router.get("/upstream/status")
+async def upstream_status():
+    return upstream_cache.upstream_status()
+
+
+@router.get("/upstream/probe")
+async def upstream_probe():
+    result = upstream_cache.probe_upstream()
+    if not result["ok"]:
+        raise HTTPException(status_code=502, detail=result)
+    return result
+
+
 @router.get("/{playlist_name}.m3u")
 async def get_playlist(
     playlist_name: str,
@@ -54,27 +67,36 @@ async def get_playlist(
             detail="IPTV_UPSTREAM_URL is not configured",
         )
 
+    engine = get_engine()
     try:
-        lines = upstream_cache.iter_lines(force_refresh=refresh)
-        body_lines, stats = get_engine().filter_lines(lines, playlist_name)
+        if include_stats:
+            stats = engine.compute_stats(
+                upstream_cache.iter_lines(force_refresh=refresh),
+                playlist_name,
+            )
+            lines = upstream_cache.iter_lines(force_refresh=False)
+        else:
+            stats = None
+            lines = upstream_cache.iter_lines(force_refresh=refresh)
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
-    except requests.HTTPError as exc:
-        raise HTTPException(
-            status_code=502,
-            detail=f"Upstream playlist fetch failed: {exc}",
-        ) from exc
+    except UpstreamFetchError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
-    headers = {}
-    if include_stats:
+    headers: dict[str, str] = {}
+    if stats is not None:
         headers = {
             "X-IPTV-Entries-In": str(stats.entries_in),
             "X-IPTV-Entries-Out": str(stats.entries_out),
             "X-IPTV-Entries-Excluded": str(stats.excluded),
         }
 
-    return Response(
-        content="\n".join(body_lines) + "\n",
+    def stream_playlist():
+        for line in engine.iter_filtered_lines(lines, playlist_name):
+            yield f"{line}\n"
+
+    return StreamingResponse(
+        stream_playlist(),
         media_type="audio/x-mpegurl",
         headers=headers,
     )
