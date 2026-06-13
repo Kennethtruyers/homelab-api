@@ -7,3 +7,4 @@ garminconnect
 psycopg2-binary 
 python-dateutil
 requests
+pyyaml

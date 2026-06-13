@@ -1,0 +1,130 @@
+# IPTV playlist proxy rules — first match wins.
+# default: exclude  →  streams that match no rule are dropped
+# default: include →  streams that match no rule are kept (use a final catch-all exclude)
+
+countries:
+  interested: [BE, NL, ES, EN]
+  aliases:
+    UK: EN
+
+playlists:
+  live:
+    description: Linear live TV for BE / NL / ES / EN
+    normalize_groups: true
+    default: exclude
+    rules:
+      - name: pluto vod
+        action: exclude
+        field: group
+        pattern: '(?i)PLUTO'
+
+      - name: 24/7 movie-series loops
+        action: exclude
+        field: group
+        pattern: '(?i)24/7.*(Movie|Series|Netflix|Prime|Apple|TOP MOVIES)'
+
+      - name: mexican vix bucket
+        action: exclude
+        field: group
+        pattern: '(?i)VIX DEPORTES'
+
+      - name: movistar vod
+        action: exclude
+        field: group
+        pattern: '(?i)M SERIES'
+
+      - name: movistar cinema
+        action: exclude
+        field: group
+        pattern: '(?i)M CINEMA'
+
+      - name: movistar docs
+        action: exclude
+        field: group
+        pattern: '(?i)DOCUMENTALES'
+
+      - name: foreign country tags in name
+        action: exclude
+        field: name
+        pattern: '\((MX|CA|US|AR|BR|CO|CL|PE|VE|EC)\)'
+
+      - name: placeholder events
+        action: exclude
+        field: name
+        pattern: '2098-12-31'
+
+      - name: pluto in stream name
+        action: exclude
+        field: name
+        pattern: '(?i)^\(PLUTO'
+
+      - name: named 24/7 series channels
+        action: exclude
+        field: name
+        pattern: '(?i)^24/7 [A-Z]'
+
+      # Optional: drop event / replay / backup groups
+      - name: event buckets
+        action: exclude
+        field: group
+        pattern: '(?i)(EVENTOS?|PPV|REPLAY|event only|BACKUP)'
+
+      - name: eu live interested countries
+        action: include
+        field: group
+        pattern: '^EU[\s-]*(BE|NL|ES|EN|UK)\b'
+
+  movies:
+    description: VOD movies for interested countries
+    normalize_groups: true
+    default: exclude
+    rules:
+      - name: skip live groups
+        action: exclude
+        field: group
+        pattern: '(?i)^(EU-|24/7)'
+
+      - name: require interested country prefix
+        action: exclude
+        field: group
+        pattern: '^(?!(BE|NL|ES|EN)\|)'
+
+      - name: series with year
+        action: exclude
+        field: group
+        pattern: '\(\d{4}\)'
+
+      - name: movie genres and vod buckets
+        action: include
+        field: group
+        pattern: '(?i)(FILM|MOVIE|PELICUL|BIOSCOOP|KINO|CINEMA|TELEFILM|DRAMA|ACTIE|COMEDIE|NETFLIX|DISNEY|HBO|PRIME|VIDEOLAND)'
+
+  series:
+    description: VOD series for interested countries
+    normalize_groups: true
+    default: exclude
+    rules:
+      - name: skip live groups
+        action: exclude
+        field: group
+        pattern: '(?i)^(EU-|24/7)'
+
+      - name: require interested country prefix
+        action: exclude
+        field: group
+        pattern: '^(?!(BE|NL|ES|EN)\|)'
+
+      - name: movie genres
+        action: exclude
+        field: group
+        pattern: '(?i)(FILM|MOVIE|PELICUL|BIOSCOOP|KINO|DRAMA|ACTIE|COMEDIE|NETFLIX|DISNEY|HBO|PRIME|VIDEOLAND)'
+
+      - name: series with year
+        action: include
+        field: group
+        pattern: '\(\d{4}\)'
+
+      - name: country vod show names
+        action: include
+        field: group
+        pattern: '^(BE|NL|ES|EN)\|'

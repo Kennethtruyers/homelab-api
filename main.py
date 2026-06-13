@@ -13,6 +13,7 @@ from tanita.api import router as tanita_router
 from garmin.api import router as garmin_router
 from withings.api import router as withings_router
 from cashflow.api import router as cashflow_router
+from iptv.api import router as iptv_router
 
 
 print("Initializing tables")
@@ -51,6 +52,9 @@ app.include_router(withings_router, prefix="/withings", tags=["withings"])
 
 ''' CashFlow '''
 app.include_router(cashflow_router, prefix="/cashflow", tags=["cashflow"])
+
+''' IPTV '''
+app.include_router(iptv_router, prefix="/iptv", tags=["iptv"])
 
 
 
