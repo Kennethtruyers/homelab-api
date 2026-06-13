@@ -11,12 +11,15 @@ TVG_NAME_RE = re.compile(r'tvg-name="([^"]*)"')
 EXTINF_DURATION_RE = re.compile(r"^#EXTINF:([^ ,]+)")
 EXTINF_ATTR_RE = re.compile(r'([\w-]+)="([^"]*)"')
 EU_PREFIX_RE = re.compile(r"^EU[\s-]*([A-Z]{2})\s*(.*)$", re.DOTALL)
+VIP_US_PREFIX_RE = re.compile(r"^VIP US-\s*(.*)$", re.IGNORECASE | re.DOTALL)
 DAY24_PREFIX_RE = re.compile(r"^24/7\|\s*([A-Z]{2})\s*(.*)$", re.DOTALL)
 COUNTRY_PIPE_RE = re.compile(r"^([A-Z]{2,3})\s*\|\s*(.*)$", re.DOTALL)
 NAME_COUNTRY_PIPE_RE = re.compile(
-    r"^(BE|NL|ES|EN|UK)\s*(?:\||-)\s*(.*)$", re.IGNORECASE | re.DOTALL
+    r"^(BE|NL|ES|EN|UK|US)\s*(?:\||-)\s*(.*)$", re.IGNORECASE | re.DOTALL
 )
-NAME_COUNTRY_PREFIX_RE = re.compile(r"^(BE|NL|ES|EN|UK)\s+(.*)$", re.IGNORECASE | re.DOTALL)
+NAME_COUNTRY_PREFIX_RE = re.compile(
+    r"^(BE|NL|ES|EN|UK|US)\s+(.*)$", re.IGNORECASE | re.DOTALL
+)
 QUALITY_PREFIX_RE = re.compile(
     r"^(?:(\d+[kK](?:\s*UHD)?)|(FHD|HD|SD|UHD))[\s\-]+",
     re.IGNORECASE,
@@ -59,6 +62,10 @@ def _parse_country_prefix(
             _resolve_country_code(eu_match.group(1), aliases),
             eu_match.group(2).strip(),
         )
+
+    vip_us_match = VIP_US_PREFIX_RE.match(stripped)
+    if vip_us_match:
+        return ("US", vip_us_match.group(1).strip())
 
     pipe_match = NAME_COUNTRY_PIPE_RE.match(stripped)
     if pipe_match:
