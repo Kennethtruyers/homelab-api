@@ -163,7 +163,7 @@ playlists:
       - name: non-interested eu groups
         action: exclude
         field: group
-        pattern: '^EU[\s-]*(?!BE|NL|ES|EN|UK)\b'
+        pattern: '^EU[\s-]*(?!BE\b|NL\b|ES\b|EN\b|UK\b)([A-Z]{2})\b'
 
       - name: vod country pipe groups
         action: exclude
