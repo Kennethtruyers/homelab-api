@@ -40,6 +40,7 @@ Filtered M3U playlists for Dispatcharr. Rules live in `iptv/rules.yaml`.
 - `GET /iptv/movies.m3u` — filtered movies playlist
 - `GET /iptv/series.m3u` — filtered series playlist
 - `GET /iptv/events.m3u` — filtered sports / PPV / event streams
+- `GET /iptv/fifa.m3u` — FIFA World Cup and FIFA+ channels
 - `GET /iptv/{name}.m3u?refresh=true` — bypass upstream cache
 - `GET /iptv/{name}.m3u?include_stats=true` — add `X-IPTV-*` count headers
 - `POST /iptv/cache/invalidate` — clear upstream cache
@@ -60,10 +61,12 @@ Env vars:
 
 Edit `iptv/rules.yaml` under the playlist's `rules` list. Rules are first-match-wins.
 
+VOD playlists gate on Xtream URL shape first (`/movie/`, `/series/`); live and events exclude VOD URLs. Country filtering uses `group-title` after that.
+
 ```yaml
 - name: my new rule
   action: exclude   # or include
-  field: group      # or name
+  field: group      # group, name, or url
   pattern: '(?i)PLUTO'
 ```
 

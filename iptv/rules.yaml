@@ -2,8 +2,18 @@
 # default: exclude  →  streams that match no rule are dropped
 # default: include →  streams that match no rule are kept (use a final catch-all exclude)
 #
-# Event name pattern (keep in sync across playlists):
+# Layering: URL type (Xtream) → country/group → event buckets (live + events only)
+#
+# Xtream URL shapes:
+#   live:   …/{user}/{pass}/{id}  or  …/live/{user}/{pass}/{id}
+#   movie:  …/movie/{user}/{pass}/{id}.ext
+#   series: …/series/{user}/{pass}/{id}.ext
+#
+# Event name pattern (keep in sync across live exclude + events include):
 # (?i)(LIVE\s*EVENT|SOLO\s*EVENTOS|2098-12-31|DAZN\s*EVENTOS?\s+\d|D\+\s*\([^)]+\)\s*Events\s+\d+)
+#
+# FIFA pattern (keep in sync across live/movies/series/events exclude + fifa include):
+# group: (?i)FIFA   name: (?i)^FIFA
 
 countries:
   interested: [BE, NL, ES, EN, UK, US]
@@ -16,6 +26,21 @@ playlists:
     normalize_names: true
     default: exclude
     rules:
+      - name: vod url
+        action: exclude
+        field: url
+        pattern: '(?i)/(movie|series)/'
+
+      - name: fifa (group)
+        action: exclude
+        field: group
+        pattern: '(?i)FIFA'
+
+      - name: fifa (name)
+        action: exclude
+        field: name
+        pattern: '(?i)^FIFA'
+
       - name: events (group)
         action: exclude
         field: group
@@ -92,35 +117,30 @@ playlists:
     normalize_names: true
     default: exclude
     rules:
-      - name: events (group)
+      - name: require movie url
+        action: exclude
+        field: url
+        pattern: '(?i)^(?!.*/movie/).*$'
+
+      - name: fifa (group)
         action: exclude
         field: group
-        pattern: '(?i)(EVENTOS?|PPV|REPLAY|event only|BACKUP|LIVE\s*EVENT|DAZN\s*(PPV|EVENT|MLB|MLS|NBA)|FIGHT\s*NIGHT|FOOTBALL.*EVENT|FORMULA\s*1\s*EVENT|COMBATE\s*EVENT|MAX\s*EVENT|RALLY\s*PPV|HUB\s*PREMIER\s*PPV|VIAPLAY\s*\(BACKUP)'
+        pattern: '(?i)FIFA'
 
-      - name: events (name)
+      - name: fifa (name)
         action: exclude
         field: name
-        pattern: '(?i)(LIVE\s*EVENT|SOLO\s*EVENTOS|2098-12-31|DAZN\s*EVENTOS?\s+\d|D\+\s*\([^)]+\)\s*Events\s+\d+)'
-
-      - name: skip live groups
-        action: exclude
-        field: group
-        pattern: '(?i)^(EU-|24/7|VIP US-)'
+        pattern: '(?i)^FIFA'
 
       - name: require interested country prefix
         action: exclude
         field: group
         pattern: '^(?!(BE|NL|ES|EN|UK|US)\|)'
 
-      - name: series with year
-        action: exclude
-        field: group
-        pattern: '\(\d{4}\)'
-
-      - name: movie genres and vod buckets
+      - name: interested country vod
         action: include
         field: group
-        pattern: '(?i)(FILM|MOVIE|PELICUL|BIOSCOOP|KINO|CINEMA|TELEFILM|DRAMA|ACTIE|COMEDIE|NETFLIX|DISNEY|HBO|PRIME|VIDEOLAND)'
+        pattern: '^(BE|NL|ES|EN|UK|US)\|'
 
   series:
     description: VOD series for interested countries
@@ -128,37 +148,27 @@ playlists:
     normalize_names: true
     default: exclude
     rules:
-      - name: events (group)
+      - name: require series url
+        action: exclude
+        field: url
+        pattern: '(?i)^(?!.*/series/).*$'
+
+      - name: fifa (group)
         action: exclude
         field: group
-        pattern: '(?i)(EVENTOS?|PPV|REPLAY|event only|BACKUP|LIVE\s*EVENT|DAZN\s*(PPV|EVENT|MLB|MLS|NBA)|FIGHT\s*NIGHT|FOOTBALL.*EVENT|FORMULA\s*1\s*EVENT|COMBATE\s*EVENT|MAX\s*EVENT|RALLY\s*PPV|HUB\s*PREMIER\s*PPV|VIAPLAY\s*\(BACKUP)'
+        pattern: '(?i)FIFA'
 
-      - name: events (name)
+      - name: fifa (name)
         action: exclude
         field: name
-        pattern: '(?i)(LIVE\s*EVENT|SOLO\s*EVENTOS|2098-12-31|DAZN\s*EVENTOS?\s+\d|D\+\s*\([^)]+\)\s*Events\s+\d+)'
-
-      - name: skip live groups
-        action: exclude
-        field: group
-        pattern: '(?i)^(EU-|24/7|VIP US-)'
+        pattern: '(?i)^FIFA'
 
       - name: require interested country prefix
         action: exclude
         field: group
         pattern: '^(?!(BE|NL|ES|EN|UK|US)\|)'
 
-      - name: movie genres
-        action: exclude
-        field: group
-        pattern: '(?i)(FILM|MOVIE|PELICUL|BIOSCOOP|KINO|DRAMA|ACTIE|COMEDIE|NETFLIX|DISNEY|HBO|PRIME|VIDEOLAND)'
-
-      - name: series with year
-        action: include
-        field: group
-        pattern: '\(\d{4}\)'
-
-      - name: country vod show names
+      - name: interested country vod
         action: include
         field: group
         pattern: '^(BE|NL|ES|EN|UK|US)\|'
@@ -169,6 +179,21 @@ playlists:
     normalize_names: true
     default: exclude
     rules:
+      - name: vod url
+        action: exclude
+        field: url
+        pattern: '(?i)/(movie|series)/'
+
+      - name: fifa (group)
+        action: exclude
+        field: group
+        pattern: '(?i)FIFA'
+
+      - name: fifa (name)
+        action: exclude
+        field: name
+        pattern: '(?i)^FIFA'
+
       - name: non-interested eu groups
         action: exclude
         field: group
@@ -193,3 +218,19 @@ playlists:
         action: include
         field: name
         pattern: '(?i)(LIVE\s*EVENT|SOLO\s*EVENTOS|2098-12-31|DAZN\s*EVENTOS?\s+\d|D\+\s*\([^)]+\)\s*Events\s+\d+)'
+
+  fifa:
+    description: FIFA World Cup and FIFA+ channels
+    normalize_groups: false
+    normalize_names: false
+    default: exclude
+    rules:
+      - name: fifa groups
+        action: include
+        field: group
+        pattern: '(?i)FIFA'
+
+      - name: fifa stream names
+        action: include
+        field: name
+        pattern: '(?i)^FIFA'

@@ -7,7 +7,7 @@ from typing import Literal
 import yaml
 
 Action = Literal["include", "exclude"]
-Field = Literal["group", "name"]
+Field = Literal["group", "name", "url"]
 DefaultAction = Literal["include", "exclude"]
 
 RULES_PATH = Path(__file__).with_name("rules.yaml")

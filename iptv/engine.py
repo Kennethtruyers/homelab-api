@@ -251,12 +251,17 @@ class RuleEngine:
             ]
 
     def evaluate(
-        self, playlist_name: str, group_title: str, stream_name: str
+        self,
+        playlist_name: str,
+        group_title: str,
+        stream_name: str,
+        stream_url: str = "",
     ) -> bool:
         playlist = self.config.playlists[playlist_name]
         target_by_field = {
             "group": group_title or "",
             "name": stream_name or "",
+            "url": stream_url or "",
         }
 
         for rule, pattern in self._compiled[playlist_name]:
@@ -286,7 +291,9 @@ class RuleEngine:
                 continue
 
             group_title, stream_name, display_name = parse_extinf_fields(extinf)
-            included = self.evaluate(playlist_name, group_title, stream_name)
+            included = self.evaluate(
+                playlist_name, group_title, stream_name, stream_url=line
+            )
             country = (
                 extract_country(group_title, self.config.country_aliases)
                 if included
